@@ -135,145 +135,77 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 #dflash.on{opacity:1;}
 
 /* ═══════════════════════════════════
-   HELP / GUIDE OVERLAY
+   HELP / GUIDE OVERLAY — LIGHT THEME
 ═══════════════════════════════════ */
-#helpOverlay{
-  position:fixed;inset:0;
-  background:rgba(3,8,15,.92);
-  z-index:9000;
-  display:none;
-  overflow-y:auto;
-  backdrop-filter:blur(4px);
-}
+#helpOverlay{position:fixed;inset:0;background:#eef2f7;z-index:9000;display:none;overflow-y:auto;}
 #helpOverlay.on{display:block;}
-#helpInner{
-  max-width:860px;
-  margin:40px auto;
-  padding:0 20px 60px;
-}
-.help-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid var(--border);
-  padding-bottom:16px;
-  margin-bottom:28px;
-}
-.help-header h2{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:28px;
-  letter-spacing:6px;
-  color:var(--accent);
-}
-.help-header p{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:1px;}
-#closeHelp{
-  background:none;border:1px solid var(--muted);color:var(--muted);
-  font-family:'JetBrains Mono',monospace;font-size:11px;
-  padding:6px 18px;cursor:pointer;border-radius:2px;
-  transition:all .2s;
-}
-#closeHelp:hover{border-color:var(--accent);color:var(--accent);}
+#helpInner{max-width:900px;margin:0 auto;padding:0 24px 60px;}
 
-.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.help-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #c0d0e0;padding:22px 0 16px;margin-bottom:22px;position:sticky;top:0;background:#eef2f7;z-index:10;}
+.help-header h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:6px;color:#0a2540;}
+.help-header p{font-size:11px;color:#4a6880;margin-top:4px;letter-spacing:1px;}
+#closeHelp{background:#0a2540;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px 20px;cursor:pointer;border-radius:4px;transition:all .2s;}
+#closeHelp:hover{background:#00a8cc;color:#fff;}
+
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 .help-grid.three{grid-template-columns:1fr 1fr 1fr;}
 .help-grid.one{grid-template-columns:1fr;}
 
-.hcard{
-  background:var(--surf);
-  border:1px solid var(--border);
-  border-radius:4px;
-  padding:16px 18px;
-}
-.hcard.accent-border{border-left:3px solid var(--accent);}
-.hcard.amber-border{border-left:3px solid var(--amber);}
-.hcard.red-border{border-left:3px solid var(--red);}
-.hcard.dark-border{border-left:3px solid var(--dark);}
-.hcard.green-border{border-left:3px solid var(--green);}
+.hcard{background:#fff;border:1px solid #c8d8e8;border-radius:6px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.hcard.accent-border{border-left:4px solid #007baa;}
+.hcard.amber-border{border-left:4px solid #c07800;}
+.hcard.red-border{border-left:4px solid #aa1111;}
+.hcard.dark-border{border-left:4px solid #bb4400;}
+.hcard.green-border{border-left:4px solid #007744;}
 
-.hcard h3{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:14px;
-  letter-spacing:3px;
-  color:var(--accent);
-  margin-bottom:10px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.hcard h3.amber{color:var(--amber);}
-.hcard h3.red{color:var(--red);}
-.hcard h3.dark{color:var(--dark);}
-.hcard h3.green{color:var(--green);}
+.hcard h3{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:#007baa;margin-bottom:10px;}
+.hcard h3.amber{color:#c07800;}
+.hcard h3.red{color:#aa1111;}
+.hcard h3.dark{color:#bb4400;}
+.hcard h3.green{color:#007744;}
 
-.hcard p{font-size:10px;color:var(--muted);line-height:1.7;margin-bottom:8px;}
+.hcard p{font-size:11px;color:#334455;line-height:1.75;margin-bottom:8px;}
 .hcard p:last-child{margin-bottom:0;}
-.hcard p strong{color:var(--text);}
+.hcard p strong{color:#0a2540;}
 
-.help-section-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:13px;
-  letter-spacing:4px;
-  color:var(--muted);
-  margin:24px 0 12px;
-  padding-bottom:6px;
-  border-bottom:1px solid var(--border);
-}
+.help-section-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:4px;color:#4a6880;margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid #c0d0e0;}
 
-.dot-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.dot-row .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.dot-row p{font-size:10px;color:var(--muted);line-height:1.5;margin:0;}
-.dot-row p strong{color:var(--text);}
+.dot-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.dot-row .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.dot-row p{font-size:11px;color:#334455;line-height:1.65;margin:0;}
+.dot-row p strong{color:#0a2540;}
 
-.alert-example{
-  display:flex;
-  gap:0;
-  margin-bottom:8px;
-  border-radius:3px;
-  overflow:hidden;
-}
-.ae-bar{width:3px;flex-shrink:0;}
-.ae-bar.i{background:var(--accent);}
-.ae-bar.w{background:var(--amber);}
-.ae-bar.c{background:var(--red);}
-.ae-bar.d{background:var(--dark);}
-.ae-body{background:var(--surf2);padding:7px 10px;flex:1;}
+.alert-example{display:flex;margin-bottom:8px;border-radius:4px;overflow:hidden;border:1px solid #dde8f0;}
+.ae-bar{width:4px;flex-shrink:0;}
+.ae-bar.i{background:#007baa;}
+.ae-bar.w{background:#c07800;}
+.ae-bar.c{background:#aa1111;}
+.ae-bar.d{background:#bb4400;}
+.ae-body{background:#f5f9fc;padding:7px 10px;flex:1;}
 .ae-type{font-size:8px;letter-spacing:2px;font-weight:700;margin-bottom:2px;}
-.ae-type.i{color:var(--accent);}
-.ae-type.w{color:var(--amber);}
-.ae-type.c{color:var(--red);}
-.ae-type.d{color:var(--dark);}
-.ae-msg{font-size:10px;color:var(--muted);}
+.ae-type.i{color:#007baa;}
+.ae-type.w{color:#c07800;}
+.ae-type.c{color:#aa1111;}
+.ae-type.d{color:#bb4400;}
+.ae-msg{font-size:10px;color:#445566;}
 
-.stat-explain{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
-.se-box{
-  background:var(--surf2);
-  border:1px solid var(--border);
-  border-radius:3px;
-  padding:6px 12px;
-  text-align:center;
-  flex-shrink:0;
-  min-width:60px;
-}
-.se-box .n{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1;}
-.se-box .l{font-size:8px;color:var(--muted);letter-spacing:1px;}
-.se-text{font-size:10px;color:var(--muted);line-height:1.7;}
-.se-text strong{color:var(--text);}
+.stat-explain{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
+.se-box{background:#f0f6fa;border:1px solid #c0d0e0;border-radius:4px;padding:6px 12px;text-align:center;flex-shrink:0;min-width:64px;}
+.se-box .n{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;color:#007baa;}
+.se-box .l{font-size:8px;color:#4a6880;letter-spacing:1px;}
+.se-text{font-size:11px;color:#334455;line-height:1.7;}
+.se-text strong{color:#0a2540;}
 
-.kn-table{width:100%;border-collapse:collapse;margin-top:6px;}
-.kn-table th{font-size:8px;letter-spacing:2px;color:var(--muted);text-align:left;padding:4px 8px;border-bottom:1px solid var(--border);}
-.kn-table td{font-size:10px;color:var(--text);padding:5px 8px;border-bottom:1px solid rgba(13,37,64,.4);}
-.kn-table td.sub{color:var(--muted);}
+.kn-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.kn-table th{font-size:9px;letter-spacing:2px;color:#4a6880;text-align:left;padding:5px 8px;border-bottom:2px solid #c0d0e0;background:#f0f6fa;}
+.kn-table td{font-size:11px;color:#223344;padding:6px 8px;border-bottom:1px solid #dde8f0;}
+.kn-table td.sub{color:#4a6880;}
 .kn-table tr:last-child td{border-bottom:none;}
+.kn-table tr:hover td{background:#f5f9fc;}
 
-.tip-box{
-  background:rgba(0,212,255,.05);
-  border:1px solid rgba(0,212,255,.2);
-  border-radius:3px;
-  padding:10px 14px;
-  margin-top:14px;
-}
-.tip-box p{font-size:10px;color:var(--muted);line-height:1.7;margin:0;}
-.tip-box p strong{color:var(--accent);}
+.tip-box{background:#e8f4fa;border:1px solid #a0c8e0;border-radius:4px;padding:12px 16px;margin-top:14px;}
+.tip-box p{font-size:11px;color:#334455;line-height:1.75;margin:0;}
+.tip-box p strong{color:#007baa;}
 
 /* Leaflet */
 .leaflet-tooltip{background:var(--surf2) !important;border:1px solid var(--border) !important;color:var(--text) !important;font-family:'JetBrains Mono',monospace !important;font-size:11px !important;border-radius:3px !important;padding:6px 10px !important;box-shadow:0 4px 16px rgba(0,0,0,.5) !important;}
@@ -700,9 +632,12 @@ function hdg(wps,t){
 function spawnVessel(d,i){
   const isIn=Math.random()>0.5, wps=isIn?WP_IN:WP_OUT;
   let prog;
-  if(d.zone==='gulf') prog=isIn?0:Math.random()*0.18;
-  else if(d.zone==='oman') prog=isIn?0.82+Math.random()*0.18:Math.random()*0.18+0.82;
-  else prog=0.2+Math.random()*0.6;
+  // Gulf vessels: spawn in western 20% of route (near Kuwait/Qatar/UAE ports)
+  if(d.zone==='gulf') prog=Math.random()*0.20;
+  // Oman vessels: spawn in eastern 20% of route (Gulf of Oman / Arabian Sea)
+  else if(d.zone==='oman') prog=0.80+Math.random()*0.20;
+  // Strait vessels: spread through middle 60%
+  else prog=0.20+Math.random()*0.60;
   const [spMin,spMax]=SR[d.type]||[8,14];
   const speed=spMin+Math.random()*(spMax-spMin);
   const [lat,lng]=lerpWP(wps,prog);
@@ -733,7 +668,7 @@ function moveVessels(){
 
 let map;
 function initMap(){
-  map=L.map('map',{center:[26.5,57.0],zoom:7,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:[26.2,56.5],zoom:6,zoomControl:false,attributionControl:false});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:14,opacity:0.9}).addTo(map);
   L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',{maxZoom:14,opacity:0.4}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
@@ -748,9 +683,9 @@ function drawLanes(){
   // Lane labels
   L.marker([26.22,57.5],{icon:L.divIcon({html:'<div style="color:rgba(0,212,255,.4);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap">← INBOUND LANE</div>',className:'',iconSize:[0,0]})}).addTo(map);
   L.marker([26.52,57.2],{icon:L.divIcon({html:'<div style="color:rgba(0,255,153,.4);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap">OUTBOUND LANE →</div>',className:'',iconSize:[0,0]})}).addTo(map);
-  // Zone labels
-  L.marker([26.95,54.9],{icon:L.divIcon({html:'<div style="color:rgba(0,255,153,.28);font-family:Bebas Neue,sans-serif;font-size:11px;letter-spacing:3px;white-space:nowrap;transform:translateX(-50%)">PERSIAN GULF</div>',className:'',iconSize:[0,0]})}).addTo(map);
-  L.marker([25.95,58.9],{icon:L.divIcon({html:'<div style="color:rgba(0,212,255,.28);font-family:Bebas Neue,sans-serif;font-size:11px;letter-spacing:3px;white-space:nowrap;transform:translateX(-50%)">GULF OF OMAN</div>',className:'',iconSize:[0,0]})}).addTo(map);
+  // Zone labels - large and visible
+  L.marker([26.80,53.50],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00ff99;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,255,153,.9),0 2px 6px rgba(0,0,0,1)">PERSIAN GULF</div><div style="color:rgba(0,255,153,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">LOADING TERMINAL ZONE</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
+  L.marker([24.50,58.50],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00d4ff;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,212,255,.9),0 2px 6px rgba(0,0,0,1)">GULF OF OMAN</div><div style="color:rgba(0,212,255,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">INDIAN OCEAN APPROACH</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
   // Narrows marker
   L.marker([26.52,56.32],{icon:L.divIcon({html:'<div style="color:rgba(255,170,0,.45);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap;letter-spacing:1px">▼ NARROWS</div>',className:'',iconSize:[0,0]})}).addTo(map);
 }
