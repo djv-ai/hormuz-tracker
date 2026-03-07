@@ -1035,13 +1035,6 @@ function updateStats(){
   document.getElementById('dkB').style.width=`${Math.min(100,dark/4*100)}%`;
   updateAnalytics();
 }
-  const delta=((total-BASELINE)/BASELINE*100).toFixed(1);
-  const ar=document.getElementById('tArr'),lb=document.getElementById('tLbl'),sb=document.getElementById('tSub');
-  if(dark>2){ar.textContent='⚠';ar.className='ta';ar.style.color='#ff6600';lb.textContent=`${dark} DARK VESSELS ACTIVE`;sb.textContent='AIS transponders off — monitoring';}
-  else if(total>BASELINE*1.12){ar.textContent='↑';ar.className='ta up';ar.style.color='';lb.textContent=`+${delta}% ABOVE BASELINE`;sb.textContent='Traffic recovering toward normal';}
-  else if(total<BASELINE*0.88){ar.textContent='↓';ar.className='ta dn';ar.style.color='';lb.textContent=`${delta}% BELOW BASELINE`;sb.textContent='⚠ Traffic disruption detected';}
-  else{ar.textContent='→';ar.className='ta st';ar.style.color='';lb.textContent=`${delta>0?'+':''}${delta}% NEAR BASELINE`;sb.textContent='Traffic within normal parameters';}
-}
 
 function drawSpk(){
   const c=document.getElementById('spk'),ctx=c.getContext('2d');
