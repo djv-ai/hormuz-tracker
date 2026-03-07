@@ -240,11 +240,6 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
   <div class="sb"><span class="n a" id="sSpd">--</span><span class="l">AVG KN</span></div>
   <div class="sb"><span class="n o" id="sDark">0</span><span class="l">DARK AIS</span></div>
   <div class="spacer"></div>
-  <div id="aispanel">
-    <label>AISSTREAM KEY</label>
-    <input id="aisKey" type="password" placeholder="Paste free API key from aisstream.io" spellcheck="false">
-    <button id="aisBtn" onclick="connectAIS()">CONNECT</button>
-  </div>
   <span class="s-sim" id="aisStat">SIM MODE</span>
   <div class="dvd"></div>
   <button id="helpBtn" onclick="toggleHelp()">? GUIDE</button>
@@ -694,62 +689,122 @@ const PORTS = {
 };
 
 const VDATA = [
-  // === STRAIT TRANSIT VESSELS ===
-  {name:"MT GULF EXPLORER",    type:"tanker",  flag:"UAE", dwt:320000, dest:"FUJAIRAH",    zone:"strait", isIn:true},
+  // === STRAIT TRANSIT — inbound (heading NW into Gulf) ===
+  {name:"MT GULF EXPLORER",     type:"tanker",  flag:"UAE", dwt:320000, dest:"FUJAIRAH",    zone:"strait", isIn:true},
+  {name:"MV KHALIFA BRIDGE",    type:"cargo",   flag:"UAE", dwt:62000,  dest:"DUBAI",       zone:"strait", isIn:true},
+  {name:"MT HORMUZ SPIRIT",     type:"tanker",  flag:"IRN", dwt:280000, dest:"BANDAR ABBAS",zone:"strait", isIn:true},
+  {name:"MV SILK ROAD",         type:"cargo",   flag:"CHN", dwt:85000,  dest:"SHANGHAI",    zone:"strait", isIn:true},
+  {name:"MT ARABIAN SEA",       type:"tanker",  flag:"KSA", dwt:310000, dest:"RAS TANURA",  zone:"strait", isIn:true},
+  {name:"MV DOHA BRIDGE",       type:"cargo",   flag:"QAT", dwt:55000,  dest:"DOHA",        zone:"strait", isIn:true},
+  {name:"MT INDIA STAR",        type:"tanker",  flag:"IND", dwt:160000, dest:"MUMBAI",      zone:"strait", isIn:true},
+  {name:"MV KARACHI TRADER",    type:"cargo",   flag:"PAK", dwt:42000,  dest:"KARACHI",     zone:"strait", isIn:true},
+  {name:"MT TIGRIS",            type:"tanker",  flag:"IRQ", dwt:295000, dest:"BASRA",       zone:"strait", isIn:true},
+  {name:"MV MANILA STAR",       type:"cargo",   flag:"PHL", dwt:38000,  dest:"MANILA",      zone:"strait", isIn:true},
+  {name:"MT CASPIAN SEA",       type:"tanker",  flag:"KAZ", dwt:245000, dest:"AKTAU",       zone:"strait", isIn:true},
+  {name:"MV BOSPHORUS",         type:"cargo",   flag:"TUR", dwt:67000,  dest:"ISTANBUL",    zone:"strait", isIn:true},
+  {name:"HMAS WARRAMUNGA",      type:"warship", flag:"AUS", dwt:6000,   dest:"TRANSIT",     zone:"strait", isIn:true},
+  {name:"??? UNIDENT-447",      type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN",     zone:"strait", isIn:true},
+
+  // === STRAIT TRANSIT — outbound (heading SE to Arabian Sea) ===
   {name:"MT AL MARJAN",         type:"tanker",  flag:"KSA", dwt:280000, dest:"JEDDAH",      zone:"strait", isIn:false},
   {name:"LNG HORMUZ STAR",      type:"tanker",  flag:"QAT", dwt:155000, dest:"JAPAN",       zone:"strait", isIn:false},
-  {name:"MV DUBAI TRADER",      type:"cargo",   flag:"UAE", dwt:45000,  dest:"DUBAI",       zone:"strait", isIn:true},
   {name:"MT PERSIAN PRIDE",     type:"tanker",  flag:"IRN", dwt:310000, dest:"CHINA",       zone:"strait", isIn:false},
-  {name:"MV KHALIFA BRIDGE",    type:"cargo",   flag:"UAE", dwt:62000,  dest:"MUSCAT",      zone:"strait", isIn:true},
   {name:"MT SULTAN",            type:"tanker",  flag:"KWT", dwt:290000, dest:"ROTTERDAM",   zone:"strait", isIn:false},
   {name:"LNG QATARI MOON",      type:"tanker",  flag:"QAT", dwt:170000, dest:"S.KOREA",     zone:"strait", isIn:false},
-  {name:"HMAS WARRAMUNGA",      type:"warship", flag:"AUS", dwt:6000,   dest:"TRANSIT",     zone:"strait", isIn:true},
-  {name:"USS PHILIPPINE SEA",   type:"warship", flag:"USA", dwt:10000,  dest:"TRANSIT",     zone:"strait", isIn:false},
   {name:"MT OCEAN EMPRESS",     type:"tanker",  flag:"GRC", dwt:305000, dest:"PIRAEUS",     zone:"strait", isIn:false},
-  {name:"MV SILK ROAD",         type:"cargo",   flag:"CHN", dwt:85000,  dest:"SHANGHAI",    zone:"strait", isIn:true},
-  {name:"??? UNIDENT-447",      type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN",     zone:"strait", isIn:true},
+  {name:"MT KHUZESTAN",         type:"tanker",  flag:"IRN", dwt:270000, dest:"GUANGZHOU",   zone:"strait", isIn:false},
+  {name:"MT ZAFAR",             type:"tanker",  flag:"OMN", dwt:185000, dest:"SINGAPORE",   zone:"strait", isIn:false},
+  {name:"MV DUBAI TRADER",      type:"cargo",   flag:"UAE", dwt:45000,  dest:"HAMBURG",     zone:"strait", isIn:false},
+  {name:"MT NOUR",              type:"tanker",  flag:"IRN", dwt:158000, dest:"CHINA",       zone:"strait", isIn:false},
+  {name:"USS PHILIPPINE SEA",   type:"warship", flag:"USA", dwt:10000,  dest:"TRANSIT",     zone:"strait", isIn:false},
+  {name:"INS VIKRAMADITYA",     type:"warship", flag:"IND", dwt:45000,  dest:"TRANSIT",     zone:"strait", isIn:false},
   {name:"??? SHADOW-12",        type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN",     zone:"strait", isIn:false},
 
-  // === PERSIAN GULF — underway ===
-  {name:"MT BAHRAIN SPIRIT",    type:"tanker",  flag:"BHR", dwt:240000, dest:"BAHRAIN",     zone:"gulf",   port:"rasLaffan"},
-  {name:"MT RIYADH",            type:"tanker",  flag:"KSA", dwt:260000, dest:"YOKOHAMA",    zone:"gulf",   port:"jubail"},
-  {name:"MT KUWAIT PRIDE",      type:"tanker",  flag:"KWT", dwt:300000, dest:"ROTTERDAM",   zone:"gulf",   port:"kuwait"},
-  {name:"MV ABU DHABI STAR",    type:"cargo",   flag:"UAE", dwt:58000,  dest:"HAMBURG",     zone:"gulf",   port:"abuDhabi"},
-  {name:"MT RAS LAFFAN",        type:"tanker",  flag:"QAT", dwt:145000, dest:"JAPAN",       zone:"gulf",   port:"rasLaffan"},
-  {name:"MV GULF PIONEER",      type:"cargo",   flag:"UAE", dwt:72000,  dest:"COLOMBO",     zone:"gulf",   port:"dubai"},
-  {name:"MT KHARG ISLAND",      type:"tanker",  flag:"IRN", dwt:285000, dest:"CHINA",       zone:"gulf",   port:"kharg"},
-  {name:"MT ABADAN",            type:"tanker",  flag:"IRN", dwt:175000, dest:"INDIA",       zone:"gulf",   port:"basra"},
-  {name:"MV DOHA EXPRESS",      type:"cargo",   flag:"QAT", dwt:38000,  dest:"KARACHI",     zone:"gulf",   port:"doha"},
-  {name:"MT BASRA PIONEER",     type:"tanker",  flag:"IRQ", dwt:310000, dest:"ROTTERDAM",   zone:"gulf",   port:"basra"},
-  {name:"MV JUBAIL STAR",       type:"cargo",   flag:"KSA", dwt:52000,  dest:"SINGAPORE",   zone:"gulf",   port:"jubail"},
-  {name:"MT BANDAR SPIRIT",     type:"tanker",  flag:"IRN", dwt:160000, dest:"CHINA",       zone:"gulf",   port:"bandarAbbas"},
+  // === PERSIAN GULF — underway, northern (Kuwait/Basra/Kharg) ===
+  {name:"MT KUWAIT PRIDE",      type:"tanker",  flag:"KWT", dwt:300000, dest:"ROTTERDAM",   zone:"gulf", port:"kuwait"},
+  {name:"MT BASRA PIONEER",     type:"tanker",  flag:"IRQ", dwt:310000, dest:"ROTTERDAM",   zone:"gulf", port:"basra"},
+  {name:"MT KHARG ISLAND",      type:"tanker",  flag:"IRN", dwt:285000, dest:"CHINA",       zone:"gulf", port:"kharg"},
+  {name:"MT ABADAN",            type:"tanker",  flag:"IRN", dwt:175000, dest:"INDIA",       zone:"gulf", port:"basra"},
+  {name:"MT FERDOWS",           type:"tanker",  flag:"IRN", dwt:300000, dest:"CHINA",       zone:"gulf", port:"kharg"},
+  {name:"MT AL AHMADI",         type:"tanker",  flag:"KWT", dwt:260000, dest:"JAPAN",       zone:"gulf", port:"kuwait"},
+  {name:"MT UMMS SHAIF",        type:"tanker",  flag:"IRN", dwt:245000, dest:"INDIA",       zone:"gulf", port:"bushehr"},
+  {name:"MV BASRA CARGO",       type:"cargo",   flag:"IRQ", dwt:44000,  dest:"AQABA",       zone:"gulf", port:"basra"},
+  {name:"MT DENA",              type:"tanker",  flag:"IRN", dwt:163000, dest:"CHINA",       zone:"gulf", port:"bushehr"},
 
-  // === PERSIAN GULF — anchored near ports ===
-  {name:"MT KUWAIT STAR",       type:"tanker",  flag:"KWT", dwt:320000, dest:"LOADING",     zone:"gulf",   port:"kuwait",     anchored:true},
-  {name:"MT LAFFAN GAS",        type:"tanker",  flag:"QAT", dwt:140000, dest:"LOADING",     zone:"gulf",   port:"rasLaffan",  anchored:true},
-  {name:"MV DUBAI PORT",        type:"cargo",   flag:"UAE", dwt:44000,  dest:"DISCHARGING", zone:"gulf",   port:"dubai",      anchored:true},
-  {name:"MT JUBAIL CRUDE",      type:"tanker",  flag:"KSA", dwt:295000, dest:"LOADING",     zone:"gulf",   port:"jubail",     anchored:true},
-  {name:"MT BUSHEHR",           type:"tanker",  flag:"IRN", dwt:190000, dest:"LOADING",     zone:"gulf",   port:"bushehr",    anchored:true},
+  // === PERSIAN GULF — underway, mid-gulf (Jubail/Bahrain/Qatar) ===
+  {name:"MT BAHRAIN SPIRIT",    type:"tanker",  flag:"BHR", dwt:240000, dest:"YOKOHAMA",    zone:"gulf", port:"jubail"},
+  {name:"MT RIYADH",            type:"tanker",  flag:"KSA", dwt:260000, dest:"YOKOHAMA",    zone:"gulf", port:"jubail"},
+  {name:"MT RAS LAFFAN",        type:"tanker",  flag:"QAT", dwt:145000, dest:"JAPAN",       zone:"gulf", port:"rasLaffan"},
+  {name:"LNG AL GHARRAFA",      type:"tanker",  flag:"QAT", dwt:140000, dest:"BARCELONA",   zone:"gulf", port:"rasLaffan"},
+  {name:"LNG MESAIMEER",        type:"tanker",  flag:"QAT", dwt:138000, dest:"ZEEBRUGGE",   zone:"gulf", port:"rasLaffan"},
+  {name:"MT NAJM",              type:"tanker",  flag:"KSA", dwt:270000, dest:"ULSAN",       zone:"gulf", port:"jubail"},
+  {name:"MV DOHA EXPRESS",      type:"cargo",   flag:"QAT", dwt:38000,  dest:"KARACHI",     zone:"gulf", port:"doha"},
+  {name:"MV GULF PEARL",        type:"cargo",   flag:"BHR", dwt:52000,  dest:"COLOMBO",     zone:"gulf", port:"doha"},
+  {name:"MT SAFANIYA",          type:"tanker",  flag:"KSA", dwt:320000, dest:"CHINA",       zone:"gulf", port:"jubail"},
+  {name:"MV AL BAHIA",          type:"cargo",   flag:"KSA", dwt:61000,  dest:"JEDDAH",      zone:"gulf", port:"jubail"},
+
+  // === PERSIAN GULF — underway, lower gulf (Dubai/Abu Dhabi/Bandar Abbas) ===
+  {name:"MV ABU DHABI STAR",    type:"cargo",   flag:"UAE", dwt:58000,  dest:"HAMBURG",     zone:"gulf", port:"abuDhabi"},
+  {name:"MV GULF PIONEER",      type:"cargo",   flag:"UAE", dwt:72000,  dest:"COLOMBO",     zone:"gulf", port:"dubai"},
+  {name:"MT BANDAR SPIRIT",     type:"tanker",  flag:"IRN", dwt:160000, dest:"CHINA",       zone:"gulf", port:"bandarAbbas"},
+  {name:"MV DUBAI GATEWAY",     type:"cargo",   flag:"UAE", dwt:80000,  dest:"SINGAPORE",   zone:"gulf", port:"dubai"},
+  {name:"MT QESHM",             type:"tanker",  flag:"IRN", dwt:210000, dest:"INDIA",       zone:"gulf", port:"bandarAbbas"},
+  {name:"MV SHARJAH STAR",      type:"cargo",   flag:"UAE", dwt:48000,  dest:"MUMBAI",      zone:"gulf", port:"dubai"},
+  {name:"MV AJMAN TRADER",      type:"cargo",   flag:"UAE", dwt:35000,  dest:"KARACHI",     zone:"gulf", port:"dubai"},
+  {name:"MV JUBAIL STAR",       type:"cargo",   flag:"KSA", dwt:52000,  dest:"SINGAPORE",   zone:"gulf", port:"jubail"},
+  {name:"MT SIRRI",             type:"tanker",  flag:"IRN", dwt:178000, dest:"CHINA",       zone:"gulf", port:"bandarAbbas"},
+
+  // === PERSIAN GULF — anchored/loading ===
+  {name:"MT KUWAIT STAR",       type:"tanker",  flag:"KWT", dwt:320000, dest:"LOADING",     zone:"gulf", port:"kuwait",    anchored:true},
+  {name:"MT AL FUNTAS",         type:"tanker",  flag:"KWT", dwt:290000, dest:"LOADING",     zone:"gulf", port:"kuwait",    anchored:true},
+  {name:"MT LAFFAN GAS 2",      type:"tanker",  flag:"QAT", dwt:140000, dest:"LOADING",     zone:"gulf", port:"rasLaffan", anchored:true},
+  {name:"LNG DUHAIL",           type:"tanker",  flag:"QAT", dwt:138000, dest:"LOADING",     zone:"gulf", port:"rasLaffan", anchored:true},
+  {name:"MT JUBAIL CRUDE",      type:"tanker",  flag:"KSA", dwt:295000, dest:"LOADING",     zone:"gulf", port:"jubail",    anchored:true},
+  {name:"MT GHAWAR",            type:"tanker",  flag:"KSA", dwt:315000, dest:"LOADING",     zone:"gulf", port:"jubail",    anchored:true},
+  {name:"MT BUSHEHR",           type:"tanker",  flag:"IRN", dwt:190000, dest:"LOADING",     zone:"gulf", port:"bushehr",   anchored:true},
+  {name:"MT LAVAN",             type:"tanker",  flag:"IRN", dwt:168000, dest:"LOADING",     zone:"gulf", port:"kharg",     anchored:true},
+  {name:"MV DUBAI PORT",        type:"cargo",   flag:"UAE", dwt:44000,  dest:"DISCHARGING", zone:"gulf", port:"dubai",     anchored:true},
+  {name:"MV KHALIFA PORT",      type:"cargo",   flag:"UAE", dwt:68000,  dest:"DISCHARGING", zone:"gulf", port:"abuDhabi",  anchored:true},
+  {name:"MV DOHA ANCHOR",       type:"cargo",   flag:"QAT", dwt:55000,  dest:"DISCHARGING", zone:"gulf", port:"doha",      anchored:true},
+  {name:"MT BASRA CRUDE",       type:"tanker",  flag:"IRQ", dwt:280000, dest:"LOADING",     zone:"gulf", port:"basra",     anchored:true},
+  {name:"MV AL ZOUR",           type:"cargo",   flag:"KWT", dwt:47000,  dest:"DISCHARGING", zone:"gulf", port:"kuwait",    anchored:true},
 
   // === GULF OF OMAN — underway ===
-  {name:"MT KISH ISLAND",       type:"tanker",  flag:"IRN", dwt:195000, dest:"SINGAPORE",   zone:"oman",   port:"khorFakkan"},
-  {name:"MV PACIFIC DRAGON",    type:"cargo",   flag:"PAN", dwt:96000,  dest:"BUSAN",       zone:"oman",   port:"sohar"},
-  {name:"MT ARABIAN GLORY",     type:"tanker",  flag:"UAE", dwt:350000, dest:"NEW YORK",    zone:"oman",   port:"fujairah"},
-  {name:"MV GOLDEN GATE",       type:"cargo",   flag:"LBR", dwt:55000,  dest:"MUMBAI",      zone:"oman",   port:"muscat"},
-  {name:"MT ZAGROS",            type:"tanker",  flag:"IRN", dwt:175000, dest:"KHARG IS.",   zone:"oman",   port:"bandarAbbas"},
-  {name:"MV MUSANDAM",          type:"cargo",   flag:"OMN", dwt:41000,  dest:"SALALAH",     zone:"oman",   port:"muscat"},
-  {name:"MT SOHAR SPIRIT",      type:"tanker",  flag:"OMN", dwt:220000, dest:"JAPAN",       zone:"oman",   port:"sohar"},
-  {name:"MV MUSCAT TRADER",     type:"cargo",   flag:"OMN", dwt:63000,  dest:"DUBAI",       zone:"oman",   port:"muscat"},
+  {name:"MT KISH ISLAND",       type:"tanker",  flag:"IRN", dwt:195000, dest:"SINGAPORE",   zone:"oman", port:"khorFakkan"},
+  {name:"MV PACIFIC DRAGON",    type:"cargo",   flag:"PAN", dwt:96000,  dest:"BUSAN",       zone:"oman", port:"sohar"},
+  {name:"MT ARABIAN GLORY",     type:"tanker",  flag:"UAE", dwt:350000, dest:"NEW YORK",    zone:"oman", port:"fujairah"},
+  {name:"MV GOLDEN GATE",       type:"cargo",   flag:"LBR", dwt:55000,  dest:"MUMBAI",      zone:"oman", port:"muscat"},
+  {name:"MT ZAGROS",            type:"tanker",  flag:"IRN", dwt:175000, dest:"CHINA",       zone:"oman", port:"bandarAbbas"},
+  {name:"MV MUSANDAM",          type:"cargo",   flag:"OMN", dwt:41000,  dest:"SALALAH",     zone:"oman", port:"muscat"},
+  {name:"MT SOHAR SPIRIT",      type:"tanker",  flag:"OMN", dwt:220000, dest:"JAPAN",       zone:"oman", port:"sohar"},
+  {name:"MV MUSCAT TRADER",     type:"cargo",   flag:"OMN", dwt:63000,  dest:"DUBAI",       zone:"oman", port:"muscat"},
+  {name:"MT HORMUZ BAY",        type:"tanker",  flag:"IRN", dwt:245000, dest:"CHINA",       zone:"oman", port:"bandarAbbas"},
+  {name:"MV SALALAH WIND",      type:"cargo",   flag:"OMN", dwt:78000,  dest:"COLOMBO",     zone:"oman", port:"sohar"},
+  {name:"MT OMAN TRADER",       type:"tanker",  flag:"OMN", dwt:195000, dest:"SINGAPORE",   zone:"oman", port:"sohar"},
+  {name:"MV INDIA BRIDGE",      type:"cargo",   flag:"IND", dwt:88000,  dest:"NHAVA SHEVA", zone:"oman", port:"muscat"},
+  {name:"MT MASIRA",            type:"tanker",  flag:"OMN", dwt:160000, dest:"JAPAN",       zone:"oman", port:"sohar"},
+  {name:"MV FUJAIRAH CARGO",    type:"cargo",   flag:"UAE", dwt:52000,  dest:"KARACHI",     zone:"oman", port:"fujairah"},
+  {name:"MT RAS AL HADD",       type:"tanker",  flag:"OMN", dwt:230000, dest:"CHINA",       zone:"oman", port:"muscat"},
+  {name:"MV CHINA BRIDGE",      type:"cargo",   flag:"CHN", dwt:92000,  dest:"TIANJIN",     zone:"oman", port:"sohar"},
+  {name:"MT LIWA",              type:"tanker",  flag:"UAE", dwt:275000, dest:"ROTTERDAM",   zone:"oman", port:"fujairah"},
+  {name:"MV KARACHI STAR",      type:"cargo",   flag:"PAK", dwt:45000,  dest:"KARACHI",     zone:"oman", port:"muscat"},
 
-  // === GULF OF OMAN — anchored ===
-  {name:"MT FUJAIRAH ANCHOR",   type:"tanker",  flag:"UAE", dwt:305000, dest:"BUNKERING",   zone:"oman",   port:"fujairah",   anchored:true},
-  {name:"MV KHOR FAKKAN",       type:"cargo",   flag:"UAE", dwt:78000,  dest:"DISCHARGING", zone:"oman",   port:"khorFakkan", anchored:true},
-  {name:"MT MUSCAT BAY",        type:"tanker",  flag:"OMN", dwt:250000, dest:"LOADING",     zone:"oman",   port:"muscat",     anchored:true},
+  // === GULF OF OMAN — anchored (Fujairah bunkering hub + Khor Fakkan) ===
+  {name:"MT FUJAIRAH ANCHOR",   type:"tanker",  flag:"UAE", dwt:305000, dest:"BUNKERING",   zone:"oman", port:"fujairah",    anchored:true},
+  {name:"MT EAGLE FUJAIRAH",    type:"tanker",  flag:"MHL", dwt:295000, dest:"BUNKERING",   zone:"oman", port:"fujairah",    anchored:true},
+  {name:"MT ATLANTIC TITAN",    type:"tanker",  flag:"GRC", dwt:310000, dest:"BUNKERING",   zone:"oman", port:"fujairah",    anchored:true},
+  {name:"MT NORDIC ODYSSEY",    type:"tanker",  flag:"NOR", dwt:280000, dest:"BUNKERING",   zone:"oman", port:"fujairah",    anchored:true},
+  {name:"MV KHOR FAKKAN",       type:"cargo",   flag:"UAE", dwt:78000,  dest:"DISCHARGING", zone:"oman", port:"khorFakkan",  anchored:true},
+  {name:"MV COSCO OMAN",        type:"cargo",   flag:"CHN", dwt:95000,  dest:"DISCHARGING", zone:"oman", port:"khorFakkan",  anchored:true},
+  {name:"MT MUSCAT BAY",        type:"tanker",  flag:"OMN", dwt:250000, dest:"LOADING",     zone:"oman", port:"muscat",      anchored:true},
+  {name:"MT SOHAR ANCHOR",      type:"tanker",  flag:"OMN", dwt:220000, dest:"BUNKERING",   zone:"oman", port:"sohar",       anchored:true},
+  {name:"MV MSC OMAN",          type:"cargo",   flag:"PAN", dwt:110000, dest:"DISCHARGING", zone:"oman", port:"sohar",       anchored:true},
 ];
+
+const BASELINE = 80;
 
 const TC = {tanker:"#00d4ff",cargo:"#00ff99",warship:"#ff2b2b",unknown:"#ffaa00",dark:"#ff6600"};
 const SR = {tanker:[9,15],cargo:[11,18],warship:[14,24],unknown:[4,9],dark:[4,8]};
-const BASELINE = 25;
 
 let vessels=[], lm={}, trails={}, selId=null;
 let tickN=0, sparkData=Array(60).fill(BASELINE).map(v=>v+(Math.random()-.5)*5);
@@ -1145,8 +1200,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementB
 
 // AIS
 function connectAIS(){
-  const key=document.getElementById('aisKey').value.trim();
-  if(!key){alert('Paste your AISStream.io API key first.\nFree key at: https://aisstream.io');return;}
+  const key='6aec39c94d240b94fcaf9c1060a5c64aa525de8b';
   if(aisWS){aisWS.close();aisWS=null;}
   setAS('Connecting...','s-sim');
   aisWS=new WebSocket('wss://stream.aisstream.io/v0/stream');
@@ -1194,8 +1248,6 @@ function tick(){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  const SAVED_KEY = '6aec39c94d240b94fcaf9c1060a5c64aa525de8b';
-  document.getElementById('aisKey').value = SAVED_KEY;
   initMap();initVessels();renderList();updateStats();drawSpk();
   setTimeout(()=>pushAlert('info','SYSTEM','Tracker online. Persian Gulf · Strait of Hormuz · Gulf of Oman active.'),400);
   setTimeout(()=>pushAlert('info','OIL FLOW','Est. 14-18 MBD crude transiting outbound. 20% of global oil supply under monitoring.'),1400);
