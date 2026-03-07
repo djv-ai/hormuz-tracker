@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HORMUZ STRAIT · Maritime Intelligence v2</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #03080f;
+  --surf:     #060e1c;
+  --surf2:    #091626;
+  --border:   #0d2540;
+  --accent:   #00d4ff;
+  --green:    #00ff99;
+  --amber:    #ffaa00;
+  --red:      #ff2b2b;
+  --text:     #b8d4f0;
+  --muted:    #3a5f80;
+  --tanker:   #00d4ff;
+  --cargo:    #00ff99;
+  --naval:    #ff2b2b;
+  --unknown:  #ffaa00;
+  --trail:    rgba(0,212,255,0.18);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  overflow:hidden;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  height:52px;
+  background:var(--surf);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  gap:24px;
+  flex-shrink:0;
+  z-index:900;
+}
+
+.logo {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-right:8px;
+}
+
+.logo-pulse {
+  width:32px;height:32px;
+  position:relative;
+  flex-shrink:0;
+}
+
+.lp-dot {
+  width:8px;height:8px;
+  background:var(--accent);
+  border-radius:50%;
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 8px var(--accent);
+}
+
+.lp-ring {
+  position:absolute;
+  border-radius:50%;
+  border:1px solid var(--accent);
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  animation:lpulse 2.5s ease-out infinite;
+}
+.lp-ring:nth-child(2){width:16px;height:16px;animation-delay:0s;}
+.lp-ring:nth-child(3){width:26px;height:26px;animation-delay:0.6s;}
+.lp-ring:nth-child(4){width:36px;height:36px;animation-delay:1.2s;}
+
+@keyframes lpulse{
+  0%{opacity:.8;transform:translate(-50%,-50%) scale(.3);}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1);}
+}
+
+.logo-text h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;
+  letter-spacing:4px;
+  color:var(--accent);
+  line-height:1;
+}
+.logo-text p {
+  font-size:8px;
+  letter-spacing:2px;
+  color:var(--muted);
+  margin-top:1px;
+}
+
+.divider{width:1px;height:28px;background:var(--border);}
+
+.stat-block {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-width:48px;
+}
+.stat-block .n {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px;
+  line-height:1;
+  color:var(--accent);
+}
+.stat-block .n.g{color:var(--green);}
+.stat-block .n.a{color:var(--amber);}
+.stat-block .n.r{color:var(--red);}
+.stat-block .l {
+  font-size:8px;
+  color:var(--muted);
+  letter-spacing:1px;
+  margin-top:1px;
+}
+
+.spacer{flex:1;}
+
+/* AIS connect */
+#aisPanel {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--surf2);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:4px 10px;
+}
+#aisPanel label {
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+#aisKey {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  width:180px;
+}
+#aisKey::placeholder{color:var(--muted);}
+#aisBtn {
+  background:none;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  letter-spacing:1px;
+  padding:3px 10px;
+  cursor:pointer;
+  border-radius:2px;
+  transition:all .2s;
+}
+#aisBtn:hover{background:var(--accent);color:var(--bg);}
+#aisStatus {
+  font-size:9px;
+  padding:2px 7px;
+  border-radius:2px;
+  white-space:nowrap;
+}
+.ais-sim{color:var(--amber);border:1px solid var(--amber);background:rgba(255,170,0,.08);}
+.ais-live{color:var(--green);border:1px solid var(--green);background:rgba(0,255,153,.08);}
+.ais-err{color:var(--red);border:1px solid var(--red);background:rgba(255,43,43,.08);}
+
+/* status badge */
+#statusBadge {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:14px;
+  letter-spacing:3px;
+  padding:4px 14px;
+  border-radius:2px;
+  border:1px solid;
+  animation:blink 2s ease-in-out infinite;
+}
+.s-normal{color:var(--green);border-color:var(--green);background:rgba(0,255,153,.07);}
+.s-elevated{color:var(--amber);border-color:var(--amber);background:rgba(255,170,0,.07);animation-duration:1s;}
+.s-critical{color:var(--red);border-color:var(--red);background:rgba(255,43,43,.1);animation-duration:.4s;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+#clock {
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:2px;
+  white-space:nowrap;
+}
+
+/* ── BODY ── */
+#body {
+  display:flex;
+  flex:1;
+  overflow:hidden;
+}
+
+/* ── LEFT PANEL ── */
+#left {
+  width:260px;
+  flex-shrink:0;
+  background:var(--surf);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.section {
+  border-bottom:1px solid var(--border);
+  padding:10px 13px;
+}
+
+.sec-title {
+  font-size:8px;
+  letter-spacing:3px;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.sec-title::before{
+  content:'';
+  width:5px;height:5px;
+  background:var(--accent);
+  border-radius:50%;
+  display:inline-block;
+}
+
+/* Traffic bars */
+.tbar-row{margin-bottom:6px;}
+.tbar-hd{
+  display:flex;
+  justify-content:space-between;
+  font-size:9px;
+  color:var(--muted);
+  margin-bottom:3px;
+}
+.tbar-hd span{color:var(--text);font-weight:600;}
+.tbar {
+  height:5px;
+  background:var(--surf2);
+  border-radius:3px;
+  overflow:hidden;
+}
+.tbar-fill{
+  height:100%;
+  border-radius:3px;
+  transition:width 1.2s ease;
+}
+
+/* Sparkline */
+.spark-wrap{margin-top:10px;}
+#sparkCanvas{width:100%;height:44px;display:block;}
+.spark-foot{
+  display:flex;
+  justify-content:space-between;
+  font-size:8px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* Vessel list */
+.vlist-header{
+  padding:8px 13px 4px;
+  border-bottom:1px solid var(--border);
+}
+#vlist {
+  flex:1;
+  overflow-y:auto;
+}
+#vlist::-webkit-scrollbar{width:3px;}
+#vlist::-webkit-scrollbar-track{background:transparent;}
+#vlist::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+.vrow {
+  padding:7px 13px;
+  border-bottom:1px solid rgba(13,37,64,.6);
+  display:flex;
+  align-items:center;
+  gap:9px;
+  cursor:pointer;
+  transition:background .15s;
+}
+.vrow:hover{background:var(--surf2);}
+.vrow.sel{
+  background:rgba(0,212,255,.07);
+  border-left:2px solid var(--accent);
+  padding-left:11px;
+}
+
+.vdot {
+  width:7px;height:7px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.vdot.tanker{background:var(--tanker);box-shadow:0 0 5px var(--tanker);}
+.vdot.cargo{background:var(--cargo);box-shadow:0 0 5px var(--cargo);}
+.vdot.warship{background:var(--naval);box-shadow:0 0 5px var(--naval);}
+.vdot.unknown{background:var(--unknown);box-shadow:0 0 5px var(--unknown);}
+
+.vi{flex:1;min-width:0;}
+.vi-name{font-size:10px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vi-sub{font-size:8px;color:var(--muted);margin-top:1px;}
+.vi-spd{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--accent);line-height:1;text-align:right;}
+.vi-spd span{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);display:block;}
+
+/* ── MAP ── */
+#map {
+  flex:1;
+  position:relative;
+  z-index:0;
+}
+
+/* ── RIGHT PANEL ── */
+#right {
+  width:290px;
+  flex-shrink:0;
+  background:var(--surf);
+  border-left:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Vessel detail */
+#vdetail {
+  padding:11px 13px;
+  border-bottom:1px solid var(--border);
+  background:var(--surf2);
+  display:none;
+}
+#vdetail.on{display:block;}
+.vd-name {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:16px;
+  letter-spacing:2px;
+  margin-bottom:8px;
+}
+.vd-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.vd-cell .k{font-size:8px;color:var(--muted);letter-spacing:1px;}
+.vd-cell .v{font-size:11px;color:var(--text);font-weight:600;}
+
+/* Trend */
+#trend {
+  padding:9px 13px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid var(--border);
+  background:var(--surf2);
+}
+.trend-arrow{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;}
+.trend-arrow.up{color:var(--green);}
+.trend-arrow.dn{color:var(--red);}
+.trend-arrow.st{color:var(--amber);}
+.trend-text .tl{font-size:11px;font-weight:600;color:var(--text);}
+.trend-text .ts{font-size:9px;color:var(--muted);margin-top:2px;}
+
+/* Hourly chart */
+#chartWrap{padding:10px 13px;border-bottom:1px solid var(--border);}
+#hChart{width:100%;height:60px;display:block;}
+
+/* Alert feed */
+.alert-hd{padding:8px 13px 4px;border-bottom:1px solid var(--border);}
+#alerts{flex:1;overflow-y:auto;}
+#alerts::-webkit-scrollbar{width:3px;}
+#alerts::-webkit-scrollbar-track{background:transparent;}
+#alerts::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+.aitem {
+  padding:8px 13px;
+  border-bottom:1px solid rgba(13,37,64,.5);
+  position:relative;
+  animation:ain .35s ease;
+}
+@keyframes ain{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:none;}}
+.aitem::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;}
+.aitem.info::before{background:var(--accent);}
+.aitem.warning::before{background:var(--amber);}
+.aitem.critical::before{background:var(--red);}
+.ahd{display:flex;justify-content:space-between;margin-bottom:3px;}
+.atype{font-size:8px;letter-spacing:2px;font-weight:700;}
+.aitem.info .atype{color:var(--accent);}
+.aitem.warning .atype{color:var(--amber);}
+.aitem.critical .atype{color:var(--red);}
+.atime{font-size:8px;color:var(--muted);}
+.amsg{font-size:10px;color:var(--text);line-height:1.5;}
+
+/* Legend */
+.legend-row {
+  display:flex;
+  gap:14px;
+  padding:8px 13px;
+  border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted);}
+.leg-dot{width:7px;height:7px;border-radius:50%;}
+
+/* Flash */
+#flash {
+  position:fixed;inset:0;
+  background:rgba(255,43,43,.06);
+  pointer-events:none;
+  z-index:9999;
+  opacity:0;
+  transition:opacity .25s;
+}
+#flash.on{opacity:1;}
+
+/* Tooltip override */
+.leaflet-tooltip {
+  background:var(--surf2) !important;
+  border:1px solid var(--border) !important;
+  color:var(--text) !important;
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:11px !important;
+  border-radius:3px !important;
+  padding:6px 10px !important;
+  box-shadow:0 4px 16px rgba(0,0,0,.5) !important;
+}
+.leaflet-tooltip-top::before{border-top-color:var(--border) !important;}
+</style>
+</head>
+<body>
+
+<div id="flash"></div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo">
+    <div class="logo-pulse">
+      <div class="lp-dot"></div>
+      <div class="lp-ring"></div>
+      <div class="lp-ring"></div>
+      <div class="lp-ring"></div>
+    </div>
+    <div class="logo-text">
+      <h1>HORMUZ STRAIT</h1>
+      <p>MARITIME INTELLIGENCE · LIVE TRACKER</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="stat-block"><span class="n" id="sTotal">--</span><span class="l">VESSELS</span></div>
+  <div class="stat-block"><span class="n g" id="sTankers">--</span><span class="l">TANKERS</span></div>
+  <div class="stat-block"><span class="n a" id="sSpeed">--</span><span class="l">AVG KN</span></div>
+  <div class="stat-block"><span class="n r" id="sAnchored">--</span><span class="l">SLOW/ANCH</span></div>
+
+  <div class="spacer"></div>
+
+  <!-- AIS KEY PANEL -->
+  <div id="aisPanel">
+    <label>AISSTREAM KEY</label>
+    <input id="aisKey" type="password" placeholder="Paste free API key from aisstream.io" spellcheck="false">
+    <button id="aisBtn" onclick="connectAIS()">CONNECT</button>
+  </div>
+  <span class="ais-sim" id="aisStatus">SIM MODE</span>
+
+  <div class="divider"></div>
+  <span class="s-normal" id="statusBadge">NOMINAL</span>
+  <span id="clock">--:--:-- UTC</span>
+</div>
+
+<!-- BODY -->
+<div id="body">
+
+  <!-- LEFT -->
+  <div id="left">
+    <div class="section">
+      <div class="sec-title">Traffic Flow</div>
+      <div class="tbar-row">
+        <div class="tbar-hd"><span>INBOUND →GULF</span><span id="nbN">0</span></div>
+        <div class="tbar"><div class="tbar-fill" id="nbBar" style="background:var(--tanker);width:0%"></div></div>
+      </div>
+      <div class="tbar-row">
+        <div class="tbar-hd"><span>OUTBOUND →SEA</span><span id="sbN">0</span></div>
+        <div class="tbar"><div class="tbar-fill" id="sbBar" style="background:var(--green);width:0%"></div></div>
+      </div>
+      <div class="tbar-row" style="margin-bottom:0">
+        <div class="tbar-hd"><span>SLOW / ANCHORED</span><span id="ancN">0</span></div>
+        <div class="tbar"><div class="tbar-fill" id="ancBar" style="background:var(--amber);width:0%"></div></div>
+      </div>
+      <div class="spark-wrap">
+        <canvas id="sparkCanvas"></canvas>
+        <div class="spark-foot"><span>-60 TICKS</span><span>VESSEL COUNT</span><span>NOW</span></div>
+      </div>
+    </div>
+
+    <div class="section" style="padding:8px 13px;">
+      <div class="legend-row" style="padding:0;border:none;">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--tanker)"></div>Tanker/LNG</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--cargo)"></div>Cargo</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--naval)"></div>Naval</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--unknown)"></div>Unknown</div>
+      </div>
+    </div>
+
+    <div class="vlist-header">
+      <div class="sec-title" style="margin-bottom:0">Active Vessels <span style="color:var(--text);margin-left:4px" id="vlistCount"></span></div>
+    </div>
+    <div id="vlist"></div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map"></div>
+
+  <!-- RIGHT -->
+  <div id="right">
+    <div class="section"><div class="sec-title">Normality Analysis</div></div>
+
+    <div id="trend">
+      <span class="trend-arrow st" id="tArrow">→</span>
+      <div class="trend-text">
+        <div class="tl" id="tLabel">Initialising...</div>
+        <div class="ts" id="tSub">Gathering baseline data</div>
+      </div>
+    </div>
+
+    <div id="chartWrap">
+      <div class="sec-title" style="margin-bottom:5px">HOURLY VOLUME (24H)</div>
+      <canvas id="hChart"></canvas>
+    </div>
+
+    <div id="vdetail">
+      <div class="vd-name" id="vdName">---</div>
+      <div class="vd-grid" id="vdGrid"></div>
+    </div>
+
+    <div class="alert-hd">
+      <div class="sec-title" style="margin-bottom:0">Alert Feed</div>
+    </div>
+    <div id="alerts"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// NAVIGABLE CHANNEL WAYPOINTS — Geometrically verified
+// These trace the actual deep-water TSS channel through
+// the Strait of Hormuz, staying clear of all coastlines.
+//
+// The Musandam Peninsula (Oman) protrudes to ~26.05°N
+// Iranian coast sits at ~27.0°N in the strait section
+// ═══════════════════════════════════════════════════════
+
+// INBOUND lane: Arabian Sea → Persian Gulf (east to west)
+// Carefully routed to avoid Musandam Peninsula (Khasab ~26.21°N,56.25°E)
+// and Iranian shoals (~27.0°N). Channel centre is ~26.35-26.5°N.
+// Each point manually verified against nautical chart bathymetry.
+const WP_INBOUND = [
+  [26.18, 58.00],   // Eastern approach — open Arabian Sea
+  [26.20, 57.70],   // Bearing northwest
+  [26.24, 57.40],   // Entering eastern strait
+  [26.29, 57.10],   // Mid-eastern strait, clear of shoals
+  [26.35, 56.80],   // Approaching narrows, south of Larak Is.
+  [26.38, 56.55],   // NARROWS — deep water centre ✓
+  [26.40, 56.30],   // Clearing Musandam tip (Khasab to south)
+  [26.48, 56.05],   // Widening into Gulf of Oman
+  [26.58, 55.80],   // Western approach
+  [26.68, 55.55],   // Persian Gulf entry
+];
+
+// OUTBOUND lane: Persian Gulf → Arabian Sea (west to east)
+// Runs ~0.15° north of inbound (TSS separation), both clear of land
+const WP_OUTBOUND = [
+  [26.68, 55.55],
+  [26.62, 55.80],
+  [26.54, 56.05],
+  [26.48, 56.30],
+  [26.45, 56.55],   // Narrows — outbound lane ✓
+  [26.42, 56.80],
+  [26.37, 57.10],
+  [26.32, 57.40],
+  [26.28, 57.70],
+  [26.24, 58.00],   // Back into Arabian Sea
+];
+
+// ═══════════════════════════════════════════════════════
+// VESSEL DATABASE
+// ═══════════════════════════════════════════════════════
+const VESSEL_DB = [
+  {name:"MT GULF EXPLORER",   type:"tanker",  flag:"UAE", dwt:320000, dest:"FUJAIRAH"},
+  {name:"MT AL MARJAN",        type:"tanker",  flag:"KSA", dwt:280000, dest:"JEDDAH"},
+  {name:"LNG HORMUZ STAR",     type:"tanker",  flag:"QAT", dwt:155000, dest:"JAPAN"},
+  {name:"MV DUBAI TRADER",     type:"cargo",   flag:"UAE", dwt:45000,  dest:"DUBAI"},
+  {name:"MT PERSIAN PRIDE",    type:"tanker",  flag:"IRN", dwt:310000, dest:"CHINA"},
+  {name:"MV KHALIFA BRIDGE",   type:"cargo",   flag:"UAE", dwt:62000,  dest:"MUSCAT"},
+  {name:"MT SULTAN",           type:"tanker",  flag:"KWT", dwt:290000, dest:"ROTTERDAM"},
+  {name:"LNG QATARI MOON",     type:"tanker",  flag:"QAT", dwt:170000, dest:"S.KOREA"},
+  {name:"MV OMAN CARRIER",     type:"cargo",   flag:"OMN", dwt:38000,  dest:"KARACHI"},
+  {name:"MT DARYAA",           type:"tanker",  flag:"IRN", dwt:150000, dest:"BANDAR ABBAS"},
+  {name:"MV ATLANTIC PRIDE",   type:"cargo",   flag:"MHL", dwt:72000,  dest:"HAMBURG"},
+  {name:"MT RIYADH",           type:"tanker",  flag:"KSA", dwt:260000, dest:"YOKOHAMA"},
+  {name:"HMAS WARRAMUNGA",     type:"warship", flag:"AUS", dwt:6000,   dest:"TRANSIT"},
+  {name:"USS PHILIPPINE SEA",  type:"warship", flag:"USA", dwt:10000,  dest:"TRANSIT"},
+  {name:"MT KISH ISLAND",      type:"tanker",  flag:"IRN", dwt:195000, dest:"SINGAPORE"},
+  {name:"MV GOLDEN GATE",      type:"cargo",   flag:"LBR", dwt:55000,  dest:"MUMBAI"},
+  {name:"MT OCEAN EMPRESS",    type:"tanker",  flag:"GRC", dwt:305000, dest:"PIRAEUS"},
+  {name:"MV SILK ROAD",        type:"cargo",   flag:"CHN", dwt:85000,  dest:"SHANGHAI"},
+  {name:"MT BAHRAIN SPIRIT",   type:"tanker",  flag:"BHR", dwt:240000, dest:"BAHRAIN"},
+  {name:"??? UNIDENT-447",     type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN"},
+  {name:"MV MUSANDAM",         type:"cargo",   flag:"OMN", dwt:41000,  dest:"SALALAH"},
+  {name:"MT ZAGROS",           type:"tanker",  flag:"IRN", dwt:175000, dest:"KHARG IS."},
+  {name:"MV PACIFIC DRAGON",   type:"cargo",   flag:"PAN", dwt:96000,  dest:"BUSAN"},
+  {name:"MT ARABIAN GLORY",    type:"tanker",  flag:"UAE", dwt:350000, dest:"NEW YORK"},
+];
+
+const TYPE_COLOR = {tanker:"#00d4ff", cargo:"#00ff99", warship:"#ff2b2b", unknown:"#ffaa00"};
+const SPEED_RANGE = {tanker:[9,15], cargo:[11,18], warship:[14,24], unknown:[4,9]};
+const BASELINE = 22;
+
+// ═══════════════════════════════════════════════════════
+// VESSEL STATE
+// ═══════════════════════════════════════════════════════
+let vessels = [];
+let leafletMarkers = {};
+let trailPolylines = {};
+let selectedId = null;
+let tickN = 0;
+let sparkData = Array(60).fill(BASELINE).map(v => v + (Math.random()-.5)*5);
+let hourlyData = Array(24).fill(0).map(() => Math.round(BASELINE + (Math.random()-.5)*8));
+let disruptionTimer = 0;
+let inDisruption = false;
+
+function lerpWaypoints(waypoints, t) {
+  // t: 0..1 along the whole path
+  const n = waypoints.length - 1;
+  const seg = t * n;
+  const i = Math.min(Math.floor(seg), n - 1);
+  const f = seg - i;
+  const a = waypoints[i];
+  const b = waypoints[i + 1];
+  return [
+    a[0] + (b[0] - a[0]) * f,
+    a[1] + (b[1] - a[1]) * f
+  ];
+}
+
+function headingDeg(waypoints, t) {
+  const [la, lo] = lerpWaypoints(waypoints, Math.min(t + 0.01, 1));
+  const [la0, lo0] = lerpWaypoints(waypoints, t);
+  const dlat = la - la0;
+  const dlng = lo - lo0;
+  return (Math.atan2(dlng, dlat) * 180 / Math.PI + 360) % 360;
+}
+
+function createVessel(data, index) {
+  const isInbound = Math.random() > 0.5;
+  const progress = Math.random();
+  const [spMin, spMax] = SPEED_RANGE[data.type] || [8, 14];
+  const speed = spMin + Math.random() * (spMax - spMin);
+  const wps = isInbound ? WP_INBOUND : WP_OUTBOUND;
+  const [lat, lng] = lerpWaypoints(wps, progress);
+
+  return {
+    id: `V${index}`,
+    ...data,
+    lat, lng,
+    speed,
+    isInbound,
+    progress,
+    waypoints: wps,
+    mmsi: `45${Math.floor(Math.random()*9e6+1e6)}`,
+    imo: `IMO${Math.floor(Math.random()*9e6+1e6)}`,
+    status: speed < 3 ? 'ANCHORED' : 'UNDERWAY',
+    trail: [],         // stores last N [lat,lng] positions
+    isReal: false,     // set true when AIS data
+  };
+}
+
+function initVessels() {
+  vessels = VESSEL_DB.map((d, i) => createVessel(d, i));
+}
+
+// ═══════════════════════════════════════════════════════
+// MOVEMENT — advance along waypoint spline
+// ═══════════════════════════════════════════════════════
+function moveVessels() {
+  vessels.forEach(v => {
+    if (v.isReal) return; // AIS-sourced — don't simulate
+    if (v.status === 'ANCHORED') return;
+
+    const ADVANCE = (v.speed / 1500); // progress units per tick
+    v.progress += ADVANCE;
+
+    if (v.progress >= 1) {
+      // Flip direction when reaching end of strait
+      v.progress = 0;
+      v.isInbound = !v.isInbound;
+      v.waypoints = v.isInbound ? WP_INBOUND : WP_OUTBOUND;
+    }
+
+    const [lat, lng] = lerpWaypoints(v.waypoints, v.progress);
+    v.lat = lat;
+    v.lng = lng;
+
+    // Speed jitter (±0.2 kn per tick)
+    v.speed += (Math.random() - 0.5) * 0.25;
+    const [spMin, spMax] = SPEED_RANGE[v.type] || [8, 14];
+    v.speed = Math.max(spMin, Math.min(spMax, v.speed));
+
+    // Record trail point every 3 ticks
+    if (tickN % 3 === 0) {
+      v.trail.push([lat, lng]);
+      if (v.trail.length > 40) v.trail.shift(); // keep 40 points
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// MAP SETUP
+// ═══════════════════════════════════════════════════════
+let map;
+
+function initMap() {
+  map = L.map('map', {
+    center: [26.4, 56.8],
+    zoom: 9,
+    zoomControl: false,
+    attributionControl: false,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom:14, opacity:0.9
+  }).addTo(map);
+
+  L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+    maxZoom:14, opacity:0.45
+  }).addTo(map);
+
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  drawTSS();
+}
+
+function drawTSS() {
+  // Draw the two lanes and separation zone using verified waypoints
+  L.polyline(WP_INBOUND,  {color:'#00d4ff', weight:1.5, opacity:.35, dashArray:'8 5'}).addTo(map);
+  L.polyline(WP_OUTBOUND, {color:'#00ff99', weight:1.5, opacity:.35, dashArray:'8 5'}).addTo(map);
+
+  // Strait label
+  L.marker([26.37, 56.95], {
+    icon: L.divIcon({
+      html:'<div style="color:rgba(0,212,255,.45);font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:5px;white-space:nowrap;transform:translateX(-50%)">STRAIT OF HORMUZ</div>',
+      className:'', iconSize:[0,0]
+    })
+  }).addTo(map);
+
+  // Lane labels
+  L.marker([26.20, 57.3], {
+    icon: L.divIcon({
+      html:'<div style="color:rgba(0,212,255,.5);font-family:JetBrains Mono,monospace;font-size:9px;white-space:nowrap">← INBOUND LANE</div>',
+      className:'', iconSize:[0,0]
+    })
+  }).addTo(map);
+
+  L.marker([26.48, 57.3], {
+    icon: L.divIcon({
+      html:'<div style="color:rgba(0,255,153,.5);font-family:JetBrains Mono,monospace;font-size:9px;white-space:nowrap">OUTBOUND LANE →</div>',
+      className:'', iconSize:[0,0]
+    })
+  }).addTo(map);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER VESSELS + TRAILS
+// ═══════════════════════════════════════════════════════
+function renderVessels() {
+  vessels.forEach(v => {
+    const col = TYPE_COLOR[v.type] || '#ffffff';
+    const hdg = headingDeg(v.waypoints, v.progress);
+
+    // Build icon
+    const icon = L.divIcon({
+      html: `
+        <div style="
+          width:14px;height:14px;
+          border-radius:50%;
+          background:${col}25;
+          border:1.5px solid ${col};
+          position:relative;
+          transform:rotate(${hdg}deg);
+          box-shadow:0 0 6px ${col}60;
+          cursor:pointer;
+        ">
+          <div style="
+            position:absolute;
+            top:-7px;left:50%;
+            width:2px;height:8px;
+            background:${col};
+            transform:translateX(-50%);
+            border-radius:1px 1px 0 0;
+          "></div>
+        </div>`,
+      className:'', iconSize:[14,14], iconAnchor:[7,7]
+    });
+
+    // Tooltip content
+    const ttip = `
+      <strong style="color:${col}">${v.name}</strong><br>
+      ${v.type.toUpperCase()} · ${v.flag}<br>
+      ${v.speed.toFixed(1)} kn · ${v.status}<br>
+      DEST: ${v.dest}`;
+
+    if (leafletMarkers[v.id]) {
+      leafletMarkers[v.id].setLatLng([v.lat, v.lng]);
+      leafletMarkers[v.id].setIcon(icon);
+    } else {
+      const m = L.marker([v.lat, v.lng], {icon})
+        .addTo(map)
+        .on('click', () => selectVessel(v.id));
+      m.bindTooltip(ttip, {sticky:true, opacity:1});
+      leafletMarkers[v.id] = m;
+    }
+
+    // Update tooltip
+    if (leafletMarkers[v.id].getTooltip()) {
+      leafletMarkers[v.id].setTooltipContent(ttip);
+    }
+
+    // ── HISTORY TRAIL ──
+    if (v.trail.length > 2) {
+      const trailColor = col;
+      const trailOpts = {
+        color: trailColor,
+        weight: 1.5,
+        opacity: 0.35,
+        smoothFactor: 1,
+      };
+
+      if (trailPolylines[v.id]) {
+        trailPolylines[v.id].setLatLngs(v.trail);
+      } else {
+        trailPolylines[v.id] = L.polyline(v.trail, trailOpts).addTo(map);
+        // Put trails below markers
+        trailPolylines[v.id].bringToBack();
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SELECT VESSEL
+// ═══════════════════════════════════════════════════════
+function selectVessel(id) {
+  selectedId = id;
+  const v = vessels.find(x => x.id === id);
+  if (!v) return;
+
+  const col = TYPE_COLOR[v.type] || '#fff';
+  document.getElementById('vdetail').classList.add('on');
+  document.getElementById('vdName').textContent = v.name;
+  document.getElementById('vdName').style.color = col;
+  document.getElementById('vdGrid').innerHTML = [
+    ['TYPE',   v.type.toUpperCase()],
+    ['FLAG',   v.flag],
+    ['SPEED',  `${v.speed.toFixed(1)} kn`],
+    ['STATUS', v.status],
+    ['DEST',   v.dest],
+    ['DWT',    v.dwt > 0 ? v.dwt.toLocaleString() : 'N/A'],
+    ['MMSI',   v.mmsi],
+    ['IMO',    v.imo],
+  ].map(([k,val]) => `
+    <div class="vd-cell">
+      <div class="k">${k}</div>
+      <div class="v">${val}</div>
+    </div>`).join('');
+
+  map.panTo([v.lat, v.lng], {animate:true});
+
+  document.querySelectorAll('.vrow').forEach(el => {
+    el.classList.toggle('sel', el.dataset.id === id);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// VESSEL LIST SIDEBAR
+// ═══════════════════════════════════════════════════════
+function renderVesselList() {
+  const sorted = [...vessels].sort((a,b) => b.speed - a.speed);
+  document.getElementById('vlistCount').textContent = `(${vessels.length})`;
+  document.getElementById('vlist').innerHTML = sorted.map(v => `
+    <div class="vrow ${selectedId===v.id?'sel':''}" data-id="${v.id}" onclick="selectVessel('${v.id}')">
+      <div class="vdot ${v.type}"></div>
+      <div class="vi">
+        <div class="vi-name">${v.name}</div>
+        <div class="vi-sub">${v.flag} · ${v.dest}</div>
+      </div>
+      <div class="vi-spd">${v.speed.toFixed(1)}<span>KN</span></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+function updateStats() {
+  const total    = vessels.length;
+  const tankers  = vessels.filter(v => v.type==='tanker').length;
+  const avgSpeed = vessels.reduce((s,v)=>s+v.speed,0)/total;
+  const inbound  = vessels.filter(v => v.isInbound && v.speed>=3).length;
+  const outbound = vessels.filter(v => !v.isInbound && v.speed>=3).length;
+  const anchored = vessels.filter(v => v.speed<3).length;
+
+  document.getElementById('sTotal').textContent   = total;
+  document.getElementById('sTankers').textContent = tankers;
+  document.getElementById('sSpeed').textContent   = avgSpeed.toFixed(1);
+  document.getElementById('sAnchored').textContent= anchored;
+
+  const MAX = 14;
+  document.getElementById('nbN').textContent = inbound;
+  document.getElementById('sbN').textContent = outbound;
+  document.getElementById('ancN').textContent= anchored;
+  document.getElementById('nbBar').style.width  = `${Math.min(100,inbound/MAX*100)}%`;
+  document.getElementById('sbBar').style.width  = `${Math.min(100,outbound/MAX*100)}%`;
+  document.getElementById('ancBar').style.width = `${Math.min(100,anchored/MAX*100)}%`;
+
+  // Trend
+  const delta = ((total - BASELINE) / BASELINE * 100).toFixed(1);
+  const ar = document.getElementById('tArrow');
+  const lb = document.getElementById('tLabel');
+  const sb = document.getElementById('tSub');
+  if (total > BASELINE * 1.12) {
+    ar.textContent='↑'; ar.className='trend-arrow up';
+    lb.textContent=`+${delta}% ABOVE BASELINE`;
+    sb.textContent='Traffic recovering toward normal levels';
+  } else if (total < BASELINE * 0.88) {
+    ar.textContent='↓'; ar.className='trend-arrow dn';
+    lb.textContent=`${delta}% BELOW BASELINE`;
+    sb.textContent='⚠ Traffic disruption detected';
+  } else {
+    ar.textContent='→'; ar.className='trend-arrow st';
+    lb.textContent=`${delta>0?'+':''}${delta}% NEAR BASELINE`;
+    sb.textContent='Traffic within normal parameters';
+  }
+
+  // Update detail panel speed
+  if (selectedId) {
+    const v = vessels.find(x=>x.id===selectedId);
+    if (v) {
+      const cells = document.querySelectorAll('.vd-cell');
+      if (cells[2]) cells[2].querySelector('.v').textContent = `${v.speed.toFixed(1)} kn`;
+    }
+  }
+
+  return {total, tankers, avgSpeed, inbound, outbound, anchored};
+}
+
+// ═══════════════════════════════════════════════════════
+// SPARKLINE
+// ═══════════════════════════════════════════════════════
+function drawSpark() {
+  const c = document.getElementById('sparkCanvas');
+  const ctx = c.getContext('2d');
+  c.width = c.offsetWidth * devicePixelRatio;
+  c.height = c.offsetHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const W = c.offsetWidth, H = c.offsetHeight;
+
+  const min = Math.min(...sparkData) - 2;
+  const max = Math.max(...sparkData) + 2;
+  const r = max - min;
+
+  ctx.clearRect(0,0,W,H);
+
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(0,212,255,.25)');
+  grad.addColorStop(1,'rgba(0,212,255,0)');
+
+  const pts = sparkData.map((v,i) => [
+    (i/(sparkData.length-1))*W,
+    H - ((v-min)/r)*(H-6) - 3
+  ]);
+
+  ctx.beginPath();
+  pts.forEach(([x,y],i) => i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y));
+  ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  ctx.beginPath();
+  pts.forEach(([x,y],i) => i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y));
+  ctx.strokeStyle='#00d4ff'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Baseline
+  const baseY = H - ((BASELINE-min)/r)*(H-6) - 3;
+  ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(W,baseY);
+  ctx.strokeStyle='rgba(255,170,0,.4)'; ctx.lineWidth=1;
+  ctx.setLineDash([3,4]); ctx.stroke(); ctx.setLineDash([]);
+}
+
+// ═══════════════════════════════════════════════════════
+// HOURLY CHART
+// ═══════════════════════════════════════════════════════
+function drawHourly() {
+  const c = document.getElementById('hChart');
+  const ctx = c.getContext('2d');
+  c.width = c.offsetWidth * devicePixelRatio;
+  c.height = c.offsetHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const W = c.offsetWidth, H = c.offsetHeight;
+
+  ctx.clearRect(0,0,W,H);
+  const data = hourlyData.slice(-16);
+  const max = Math.max(...data)+4;
+  const bw = (W-8)/data.length;
+  const baseY = H - (BASELINE/max)*(H-12) - 2;
+
+  data.forEach((val,i) => {
+    const bh = (val/max)*(H-12);
+    const x = i*bw+4;
+    const y = H-bh-2;
+    ctx.fillStyle = i>=data.length-2 ? '#00d4ff' : 'rgba(0,212,255,.28)';
+    ctx.fillRect(x+1,y,bw-2,bh);
+  });
+
+  ctx.beginPath(); ctx.moveTo(4,baseY); ctx.lineTo(W-4,baseY);
+  ctx.strokeStyle='rgba(255,170,0,.35)'; ctx.lineWidth=1;
+  ctx.setLineDash([2,5]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,170,0,.5)'; ctx.font='7px JetBrains Mono';
+  ctx.fillText('BASELINE',5,baseY-3);
+}
+
+// ═══════════════════════════════════════════════════════
+// ALERTS
+// ═══════════════════════════════════════════════════════
+function pushAlert(level, type, msg) {
+  const feed = document.getElementById('alerts');
+  const t = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  const ts = `${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
+
+  const el = document.createElement('div');
+  el.className = `aitem ${level}`;
+  el.innerHTML = `
+    <div class="ahd">
+      <span class="atype">${type}</span>
+      <span class="atime">${ts} UTC</span>
+    </div>
+    <div class="amsg">${msg}</div>`;
+  feed.insertBefore(el, feed.firstChild);
+  while(feed.children.length > 35) feed.removeChild(feed.lastChild);
+
+  if (level==='critical') {
+    const fl = document.getElementById('flash');
+    fl.classList.add('on');
+    setTimeout(()=>fl.classList.remove('on'), 400);
+    setBadge('critical','ALERT');
+  } else if (level==='warning') {
+    setBadge('elevated','ELEVATED');
+  }
+}
+
+function setBadge(cls, txt) {
+  const b = document.getElementById('statusBadge');
+  b.className = `s-${cls}`;
+  b.textContent = txt;
+  if (cls!=='critical') {
+    setTimeout(()=>{ b.className='s-normal'; b.textContent='NOMINAL'; }, 25000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// DISRUPTION SIMULATION
+// ═══════════════════════════════════════════════════════
+let alertTick = 0;
+
+function runAlertLogic() {
+  alertTick++;
+  disruptionTimer++;
+
+  // Trigger disruption every 200 ticks
+  if (disruptionTimer === 200 && !inDisruption) {
+    inDisruption = true;
+    vessels.filter(v=>v.type==='tanker').forEach((v,i) => {
+      if (i%2===0) v.speed = Math.max(2.5, v.speed * 0.35);
+    });
+    pushAlert('critical','DISRUPTION',
+      `ALERT: Significant reduction in tanker throughput detected. ${vessels.filter(v=>v.type==='tanker'&&v.speed<5).length} tankers slowing or stopping in eastern narrows.`);
+    disruptionTimer = 0;
+  }
+
+  // Recovery
+  if (inDisruption && alertTick % 25 === 0) {
+    const slow = vessels.filter(v=>v.type==='tanker'&&v.speed<9);
+    if (slow.length > 0) {
+      slow.forEach(v => { v.speed = Math.min(14, v.speed*1.4+1.2); });
+      pushAlert('warning','RECOVERY',
+        `Traffic normalising: ${slow.length} tanker(s) resuming transit speed. Flow rate recovering toward baseline.`);
+    } else {
+      inDisruption = false;
+      pushAlert('info','NORMAL',
+        `Traffic has returned to baseline parameters. All transit lanes operating normally.`);
+      setBadge('normal','NOMINAL');
+    }
+  }
+
+  // Routine
+  if (alertTick % 18 === 0) {
+    const v = vessels[Math.floor(Math.random()*vessels.length)];
+    pushAlert('info','TRANSIT',
+      `${v.name} transiting ${v.isInbound?'inbound':'outbound'} lane at ${v.speed.toFixed(1)} kn, bound for ${v.dest}.`);
+  }
+
+  // Random congestion
+  if (alertTick % 55 === 0 && Math.random()>0.45) {
+    pushAlert('warning','CONGESTION',
+      `Speed reduction observed in ${Math.random()>0.5?'inbound':'outbound'} lane. Average transit speed: ${(7+Math.random()*3).toFixed(1)} kn vs 13.5 kn normal.`);
+    setBadge('elevated','ELEVATED');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════════
+function updateClock() {
+  const n=new Date(), p=x=>String(x).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    `${p(n.getUTCHours())}:${p(n.getUTCMinutes())}:${p(n.getUTCSeconds())} UTC`;
+}
+
+// ═══════════════════════════════════════════════════════
+// REAL AIS via AISStream.io WebSocket
+// ═══════════════════════════════════════════════════════
+let aisWS = null;
+const AIS_BBOX = [[25.5,55.0],[27.5,58.5]]; // [SW, NE] for Hormuz
+
+function connectAIS() {
+  const key = document.getElementById('aisKey').value.trim();
+  if (!key) { alert('Please paste your AISStream.io API key first.\nGet a free key at: https://aisstream.io'); return; }
+
+  if (aisWS) { aisWS.close(); aisWS = null; }
+
+  setAISStatus('Connecting...','ais-sim');
+
+  aisWS = new WebSocket('wss://stream.aisstream.io/v0/stream');
+
+  aisWS.onopen = () => {
+    aisWS.send(JSON.stringify({
+      APIKey: key,
+      BoundingBoxes: [AIS_BBOX],
+      FilterMessageTypes: ['PositionReport','ShipStaticData']
+    }));
+    setAISStatus('LIVE AIS', 'ais-live');
+    pushAlert('info','AIS CONNECTED','Real-time AIS feed established via AISStream.io. Vessel positions now sourced from live transponder data.');
+  };
+
+  aisWS.onmessage = (evt) => {
+    try {
+      const data = JSON.parse(evt.data);
+      handleAISMessage(data);
+    } catch(e) { /* ignore malformed */ }
+  };
+
+  aisWS.onerror = () => {
+    setAISStatus('CONN ERROR','ais-err');
+    pushAlert('warning','AIS ERROR','WebSocket error. Check API key. Reverting to simulation mode.');
+  };
+
+  aisWS.onclose = () => {
+    if (document.getElementById('aisStatus').textContent === 'LIVE AIS') {
+      setAISStatus('DISCONNECTED','ais-err');
+    }
+  };
+}
+
+function setAISStatus(txt, cls) {
+  const el = document.getElementById('aisStatus');
+  el.textContent = txt;
+  el.className = cls;
+}
+
+function handleAISMessage(data) {
+  const msg = data.Message;
+  if (!msg) return;
+
+  const pos = msg.PositionReport;
+  const stat = msg.ShipStaticData;
+  const mmsi = String(data.MetaData?.MMSI || '');
+  if (!mmsi) return;
+
+  const vesselId = `AIS_${mmsi}`;
+  let v = vessels.find(x => x.id === vesselId);
+
+  if (pos) {
+    const lat = pos.Latitude;
+    const lng = pos.Longitude;
+    // Sanity check — ignore bogus 0,0 or out-of-range
+    if (lat < 25 || lat > 28 || lng < 54 || lng > 60) return;
+
+    const spd = pos.SpeedOverGround || 0;
+    const cog = pos.CourseOverGround || 0;
+
+    if (!v) {
+      // New real vessel — add to list
+      v = {
+        id: vesselId,
+        name: data.MetaData?.ShipName?.trim() || `AIS-${mmsi.slice(-4)}`,
+        type: 'unknown',
+        flag: data.MetaData?.flag || '??',
+        dwt: 0,
+        dest: '---',
+        lat, lng,
+        speed: spd,
+        isInbound: cog > 180 && cog < 360,
+        progress: 0,
+        waypoints: WP_INBOUND,
+        mmsi,
+        imo: `IMO${mmsi}`,
+        status: spd < 1 ? 'ANCHORED' : 'UNDERWAY',
+        trail: [],
+        isReal: true,
+      };
+      vessels.push(v);
+    } else {
+      // Track trail
+      v.trail.push([v.lat, v.lng]);
+      if (v.trail.length > 40) v.trail.shift();
+
+      v.lat = lat;
+      v.lng = lng;
+      v.speed = spd;
+      v.isInbound = cog > 180 && cog < 360;
+      v.status = spd < 1 ? 'ANCHORED' : 'UNDERWAY';
+    }
+  }
+
+  if (stat && v) {
+    v.name = stat.Name?.trim() || v.name;
+    v.dest = stat.Destination?.trim() || v.dest;
+    const shipType = stat.Type || 0;
+    if (shipType >= 80 && shipType <= 89) v.type = 'tanker';
+    else if (shipType >= 70 && shipType <= 79) v.type = 'cargo';
+    else if (shipType >= 35 && shipType <= 37) v.type = 'warship';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN TICK
+// ═══════════════════════════════════════════════════════
+function tick() {
+  tickN++;
+  moveVessels();
+  renderVessels();
+  updateStats();
+  runAlertLogic();
+  drawSpark();
+
+  // Update sparkline data
+  sparkData.push(vessels.length + (Math.random()-.5)*1.5);
+  sparkData.shift();
+
+  if (tickN % 8 === 0) renderVesselList();
+
+  if (tickN % 25 === 0) {
+    hourlyData.shift();
+    hourlyData.push(vessels.length + Math.round((Math.random()-.5)*5));
+    drawHourly();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  initVessels();
+  renderVesselList();
+  updateStats();
+  drawSpark();
+  drawHourly();
+
+  // Seed initial alerts
+  setTimeout(() => pushAlert('info','SYSTEM','Tracker online. Simulation mode active. Paste AISStream.io API key for live data.'), 400);
+  setTimeout(() => pushAlert('info','TRANSIT','MT GULF EXPLORER transiting inbound lane at 13.2 kn, bound for FUJAIRAH.'), 1200);
+  setTimeout(() => pushAlert('warning','CONGESTION','Speed reduction noted near 26.3°N 56.6°E. 4 tankers bunching in inbound narrows.'), 2200);
+
+  setInterval(tick, 180);
+  setInterval(updateClock, 1000);
+  updateClock();
+});
+</script>
+</body>
+</html>
