@@ -824,14 +824,22 @@ function initVessels(){vessels=VDATA.map((d,i)=>spawnVessel(d,i));}
 function moveVessels(){
   vessels.forEach(v=>{
     if(v.isReal||v.status==='ANCHORED') return;
-    v.prog+=v.speed/2200;
-    if(v.prog>=1){v.prog=0;v.isIn=!v.isIn;v.wps=v.isIn?WP_IN:WP_OUT;}
-    const[lat,lng]=lerpWP(v.wps,v.prog);
-    v.lat=lat;v.lng=lng;
-    v.speed+=(Math.random()-.5)*0.2;
+    if(v.zone==='strait'){
+      v.prog+=v.speed/2200;
+      if(v.prog>=1){v.prog=0;v.isIn=!v.isIn;v.wps=v.isIn?WP_IN:WP_OUT;}
+      const[lat,lng]=lerpWP(v.wps,v.prog);
+      v.lat=lat; v.lng=lng;
+      v.heading=v.isIn?300:120;
+    } else {
+      v.lat+=(v.driftLat||rnd(-0.0005,0.0005));
+      v.lng+=(v.driftLng||rnd(-0.0005,0.0005));
+      if(v.zone==='gulf'){v.lat=Math.max(24.0,Math.min(29.8,v.lat));v.lng=Math.max(48.0,Math.min(57.0,v.lng));}
+      if(v.zone==='oman'){v.lat=Math.max(22.0,Math.min(26.5,v.lat));v.lng=Math.max(55.5,Math.min(61.5,v.lng));}
+    }
+    v.speed+=rnd(-0.15,0.15);
     const[mn,mx]=SR[v.isDark?'dark':v.type]||[8,14];
     v.speed=Math.max(mn,Math.min(mx,v.speed));
-    if(tickN%3===0){v.trail.push([lat,lng]);if(v.trail.length>35)v.trail.shift();}
+    if(tickN%3===0){v.trail.push([v.lat,v.lng]);if(v.trail.length>25)v.trail.shift();}
   });
 }
 
@@ -865,17 +873,26 @@ function renderVessels(){
       return;
     }
     const col=TC[v.type]||'#fff';
-    const h=hdg(v.wps,v.prog);
-    const icon=L.divIcon({
-      html:`<div style="width:14px;height:14px;border-radius:50%;background:${col}20;border:1.5px solid ${col};position:relative;transform:rotate(${h}deg);box-shadow:0 0 6px ${col}50;cursor:pointer;"><div style="position:absolute;top:-7px;left:50%;width:2px;height:8px;background:${col};transform:translateX(-50%);border-radius:1px 1px 0 0;"></div></div>`,
-      className:'',iconSize:[14,14],iconAnchor:[7,7]
-    });
+    const isAnchored = v.status==='ANCHORED';
+    const h = v.heading !== undefined ? v.heading : (v.zone==='strait'?(v.isIn?300:120):90);
+
+    const icon = isAnchored
+      ? L.divIcon({
+          html:`<div style="width:9px;height:9px;border-radius:50%;background:${col};box-shadow:0 0 5px ${col};opacity:.8;cursor:pointer;border:1px solid rgba(255,255,255,.3)"></div>`,
+          className:'', iconSize:[9,9], iconAnchor:[4,4]
+        })
+      : L.divIcon({
+          html:`<svg width="16" height="20" viewBox="0 0 16 20" style="transform:rotate(${h}deg);cursor:pointer;overflow:visible;filter:drop-shadow(0 0 3px ${col})"><polygon points="8,0 16,18 8,13 0,18" fill="${col}" fill-opacity=".9" stroke="rgba(0,0,0,.5)" stroke-width="0.5"/></svg>`,
+          className:'', iconSize:[16,20], iconAnchor:[8,10]
+        });
+
     const tt=`<strong style="color:${col}">${v.name}</strong><br>${v.type.toUpperCase()} · ${v.flag}<br>${v.speed.toFixed(1)} kn · ${v.status}<br>DEST: ${v.dest}<br>ZONE: ${v.zone.toUpperCase()}`;
     if(lm[v.id]){lm[v.id].setLatLng([v.lat,v.lng]).setIcon(icon);lm[v.id].setTooltipContent(tt);}
     else{const m=L.marker([v.lat,v.lng],{icon}).addTo(map).on('click',()=>selVessel(v.id));m.bindTooltip(tt,{sticky:true,opacity:1});lm[v.id]=m;}
-    if(v.trail.length>2){
+    // Trails for strait vessels only
+    if(v.zone==='strait'&&v.trail.length>2){
       if(trails[v.id])trails[v.id].setLatLngs(v.trail);
-      else{trails[v.id]=L.polyline(v.trail,{color:col,weight:1.5,opacity:.28}).addTo(map);trails[v.id].bringToBack();}
+      else{trails[v.id]=L.polyline(v.trail,{color:col,weight:1.5,opacity:.25}).addTo(map);trails[v.id].bringToBack();}
     }
   });
 }
