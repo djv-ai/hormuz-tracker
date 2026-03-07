@@ -52,8 +52,8 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 .b-dk{color:var(--dark);border-color:var(--dark);background:rgba(255,102,0,.1);animation-duration:.6s;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.55;}}
 #clock{font-size:11px;color:var(--muted);letter-spacing:2px;white-space:nowrap;}
-#helpBtn{background:none;border:1px solid var(--muted);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 12px;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap;}
-#helpBtn:hover{border-color:var(--accent);color:var(--accent);}
+#helpBtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.7);color:#ffffff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 12px;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap;font-weight:600;}
+#helpBtn:hover{background:rgba(255,255,255,.25);border-color:#fff;color:#fff;}
 
 /* BODY */
 #body{display:flex;flex:1;overflow:hidden;}
@@ -207,6 +207,17 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 .tip-box p{font-size:11px;color:#334455;line-height:1.75;margin:0;}
 .tip-box p strong{color:#007baa;}
 
+/* ANALYTICS CARDS */
+.astat{background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:5px 8px;text-align:center;}
+.astat-v{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;color:var(--accent);}
+.astat-l{font-size:7px;color:var(--muted);letter-spacing:1px;margin-top:1px;}
+.flowcard{background:var(--surf2);border:1px solid;border-radius:3px;padding:6px 8px;}
+.rbar-row{margin-bottom:6px;}
+.rbar-label{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:2px;}
+.rbar-label span{color:var(--text);}
+.rbar-track{height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden;}
+.rbar-fill{height:100%;border-radius:3px;transition:width 1.2s ease;}
+
 /* Leaflet */
 .leaflet-tooltip{background:var(--surf2) !important;border:1px solid var(--border) !important;color:var(--text) !important;font-family:'JetBrains Mono',monospace !important;font-size:11px !important;border-radius:3px !important;padding:6px 10px !important;box-shadow:0 4px 16px rgba(0,0,0,.5) !important;}
 </style>
@@ -283,21 +294,87 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
   <!-- MAP -->
   <div id="map"></div>
 
-  <!-- RIGHT PANEL -->
+  <!-- RIGHT PANEL — ANALYTICS -->
   <div id="right">
-    <div class="sec"><div class="st">Normality Analysis</div></div>
-    <div id="trend">
-      <span class="ta st" id="tArr">→</span>
-      <div class="tt"><div class="tl" id="tLbl">Initialising...</div><div class="ts" id="tSub">Gathering baseline data</div></div>
+
+    <!-- CHOKEPOINT RISK INDEX -->
+    <div class="sec" style="padding:10px 13px 8px;">
+      <div class="st">Chokepoint Risk Index</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <div style="flex:1;height:10px;background:var(--surf2);border-radius:5px;overflow:hidden;border:1px solid var(--border);">
+          <div id="riskBar" style="height:100%;border-radius:5px;background:var(--green);width:15%;transition:width 1s ease,background 1s ease;"></div>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:36px;text-align:right;" id="riskVal">LOW</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
+        <div class="astat"><div class="astat-v" id="riskScore">12</div><div class="astat-l">RISK /100</div></div>
+        <div class="astat"><div class="astat-v" id="congScore" style="color:var(--amber)">--</div><div class="astat-l">CONGESTION</div></div>
+        <div class="astat"><div class="astat-v" id="darkScore" style="color:var(--dark)">--</div><div class="astat-l">DARK RATE</div></div>
+      </div>
     </div>
-    <div id="chw">
-      <div class="st" style="margin-bottom:5px">HOURLY VOLUME (24H)</div>
-      <canvas id="hch"></canvas>
+
+    <!-- OIL FLOW -->
+    <div class="sec" style="padding:9px 13px 8px;">
+      <div class="st">Oil &amp; LNG Flow</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;">
+        <div class="flowcard" style="border-color:rgba(0,212,255,.3)">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">OUTBOUND CRUDE</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--tanker);line-height:1;" id="oilOut">--</div>
+          <div style="font-size:8px;color:var(--muted);">MBD est.</div>
+        </div>
+        <div class="flowcard" style="border-color:rgba(0,255,153,.3)">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">OUTBOUND LNG</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--green);line-height:1;" id="lngOut">--</div>
+          <div style="font-size:8px;color:var(--muted);">BCF/day est.</div>
+        </div>
+        <div class="flowcard" style="border-color:rgba(255,170,0,.3)">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">INBOUND CARGO</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--amber);line-height:1;" id="cargoIn">--</div>
+          <div style="font-size:8px;color:var(--muted);">vessels</div>
+        </div>
+        <div class="flowcard" style="border-color:rgba(255,43,43,.3)">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">WORLD OIL SHARE</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--red);line-height:1;" id="worldShare">--</div>
+          <div style="font-size:8px;color:var(--muted);">% of supply</div>
+        </div>
+      </div>
+      <!-- Oil flow bar -->
+      <div style="margin-top:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-bottom:3px;">
+          <span>OUTBOUND FLOW vs NORMAL (17 MBD)</span><span id="flowPct">--</span>
+        </div>
+        <div style="height:6px;background:var(--surf2);border-radius:3px;overflow:hidden;border:1px solid var(--border);">
+          <div id="flowBar" style="height:100%;background:linear-gradient(90deg,var(--tanker),var(--green));border-radius:3px;width:80%;transition:width 1.2s ease;"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- STRANDED CARGO -->
+    <div class="sec" style="padding:9px 13px 8px;">
+      <div class="st">Stranded &amp; Waiting</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;">
+        <div class="astat"><div class="astat-v" id="strandAnc" style="color:var(--amber)">--</div><div class="astat-l">ANCHORED</div></div>
+        <div class="astat"><div class="astat-v" id="strandSlow" style="color:var(--amber)">--</div><div class="astat-l">SLOW &lt;6KN</div></div>
+        <div class="astat"><div class="astat-v" id="strandVal" style="color:var(--red)">--</div><div class="astat-l">$B CARGO</div></div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);line-height:1.5;padding:5px 8px;background:var(--surf2);border-radius:3px;border:1px solid var(--border);" id="strandNote">
+        Calculating stranded cargo value...
+      </div>
+    </div>
+
+    <!-- REGIONAL BREAKDOWN -->
+    <div class="sec" style="padding:9px 13px 8px;">
+      <div class="st">Regional Cargo Breakdown</div>
+      <div id="regionBars"></div>
+    </div>
+
+    <!-- VESSEL DETAIL (shown on click) -->
     <div id="vdetail">
       <div class="vd-n" id="vdN">---</div>
       <div class="vd-g" id="vdG"></div>
     </div>
+
+    <!-- ALERT FEED -->
     <div class="alhd"><div class="st" style="margin-bottom:0">Alert Feed</div></div>
     <div id="alerts"></div>
   </div>
@@ -538,87 +615,136 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 // ═══════════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════════
-// CORRECTED WAYPOINTS — proper curve matching real strait geometry
+// CORRECTED WAYPOINTS — full geography
 //
-// Real shape: vessels come from SOUTH-SOUTHEAST in Gulf of Oman,
-// curve NORTH around Musandam Peninsula, then head NORTHWEST
-// into Persian Gulf toward Kuwait/Qatar/Bahrain terminals.
-// This creates a clear visible bend — NOT a straight line.
-//
-// Musandam tip: ~26.40°N 56.27°E  — lanes stay above 26.48°N here
-// Qeshm Island south coast: ~26.52°N 55.8-56.3°E — lanes stay south
+// Persian Gulf extends to Kuwait ~29°N 48°E (NOT just UAE coast)
+// Gulf of Oman extends to Arabian Sea ~22°N 61°E
+// Route bends: ships come from SE, turn WNW through strait, then NW into gulf
 // ═══════════════════════════════════════════════════════════════════
 
 const WP_IN = [
-  [24.20, 59.80],  // Arabian Sea / deep Gulf of Oman — FAR SOUTH
-  [24.60, 59.20],  // Gulf of Oman approach — heading NNW
-  [25.10, 58.70],
-  [25.55, 58.20],  // Turning more northward
-  [25.90, 57.80],
-  [26.15, 57.40],  // Bending northwest toward strait entrance
-  [26.30, 57.05],
-  [26.40, 56.72],
-  [26.46, 56.45],  // Approaching narrows — curving north
-  [26.50, 56.22],  // *** NARROWS — north of Musandam 26.40°N ***
-  [26.54, 55.98],  // Clearing — now heading more WEST-NORTHWEST
-  [26.62, 55.68],
-  [26.72, 55.30],  // Persian Gulf entry — route bends northwest
-  [26.90, 54.90],
-  [27.15, 54.45],  // Heading toward UAE/Oman terminals
-  [27.45, 53.90],
-  [27.70, 53.40],  // Deep Persian Gulf — northwest toward Qatar/Bahrain
+  [22.50, 61.50],  // Arabian Sea — far southeast
+  [23.00, 60.80],
+  [23.50, 60.10],
+  [24.00, 59.40],  // Gulf of Oman approach heading NNW
+  [24.60, 58.80],
+  [25.10, 58.20],
+  [25.60, 57.70],  // Gulf of Oman — route curving more northward
+  [26.00, 57.30],
+  [26.20, 57.00],
+  [26.35, 56.70],  // Entering strait — heading WNW
+  [26.46, 56.40],
+  [26.50, 56.15],  // *** NARROWS — safely north of Musandam 26.40°N ***
+  [26.55, 55.85],  // Clearing peninsula — now heading northwest
+  [26.65, 55.45],
+  [26.80, 55.00],  // Persian Gulf entry
+  [26.90, 54.40],
+  [27.10, 53.70],  // Heading NW up Persian Gulf
+  [27.30, 53.00],
+  [27.60, 52.20],
+  [27.90, 51.40],  // Mid Persian Gulf — Bahrain/Qatar region
+  [28.30, 50.50],
+  [28.70, 49.50],
+  [29.10, 48.80],  // Deep Persian Gulf — Kuwait area
 ];
 
 const WP_OUT = [
-  [27.70, 53.40],
-  [27.45, 53.90],
-  [27.18, 54.45],
-  [26.95, 54.90],
-  [26.76, 55.30],
-  [26.66, 55.68],
-  [26.58, 55.98],
-  [26.54, 56.22],  // *** NARROWS outbound — lanes ~0.04° apart ***
-  [26.50, 56.45],
-  [26.44, 56.72],
-  [26.34, 57.05],
-  [26.20, 57.40],
-  [25.95, 57.80],
-  [25.60, 58.20],
-  [25.15, 58.70],
-  [24.65, 59.20],
-  [24.20, 59.80],  // Back into Arabian Sea
+  [29.10, 48.80],
+  [28.70, 49.50],
+  [28.30, 50.50],
+  [27.90, 51.40],
+  [27.60, 52.20],
+  [27.30, 53.00],
+  [27.10, 53.70],
+  [26.90, 54.40],
+  [26.80, 55.00],
+  [26.68, 55.45],
+  [26.58, 55.85],
+  [26.54, 56.15],  // *** NARROWS outbound ***
+  [26.50, 56.40],
+  [26.38, 56.70],
+  [26.24, 57.00],
+  [26.04, 57.30],
+  [25.65, 57.70],
+  [25.15, 58.20],
+  [24.65, 58.80],
+  [24.05, 59.40],
+  [23.55, 60.10],
+  [23.05, 60.80],
+  [22.50, 61.50],  // Back to Arabian Sea
 ];
 
+// Ports/anchor zones — vessels spawn near these with scatter
+const PORTS = {
+  kuwait:    {lat:29.10, lng:48.10},
+  basra:     {lat:29.70, lng:48.70},
+  kharg:     {lat:29.20, lng:50.30},
+  bushehr:   {lat:28.98, lng:50.82},
+  doha:      {lat:25.28, lng:51.55},
+  rasLaffan: {lat:25.92, lng:51.55},
+  jubail:    {lat:27.00, lng:49.65},
+  abuDhabi:  {lat:24.48, lng:54.37},
+  dubai:     {lat:25.27, lng:55.30},
+  khorFakkan:{lat:25.33, lng:56.35},
+  fujairah:  {lat:25.12, lng:56.34},
+  bandarAbbas:{lat:27.18,lng:56.27},
+  muscat:    {lat:23.62, lng:58.59},
+  sohar:     {lat:24.35, lng:56.75},
+  salalah:   {lat:16.93, lng:54.00},
+};
+
 const VDATA = [
-  {name:"MT GULF EXPLORER",   type:"tanker",  flag:"UAE", dwt:320000, dest:"FUJAIRAH",   zone:"strait"},
-  {name:"MT AL MARJAN",        type:"tanker",  flag:"KSA", dwt:280000, dest:"JEDDAH",     zone:"strait"},
-  {name:"LNG HORMUZ STAR",     type:"tanker",  flag:"QAT", dwt:155000, dest:"JAPAN",      zone:"strait"},
-  {name:"MV DUBAI TRADER",     type:"cargo",   flag:"UAE", dwt:45000,  dest:"DUBAI",      zone:"strait"},
-  {name:"MT PERSIAN PRIDE",    type:"tanker",  flag:"IRN", dwt:310000, dest:"CHINA",      zone:"strait"},
-  {name:"MV KHALIFA BRIDGE",   type:"cargo",   flag:"UAE", dwt:62000,  dest:"MUSCAT",     zone:"strait"},
-  {name:"MT SULTAN",           type:"tanker",  flag:"KWT", dwt:290000, dest:"ROTTERDAM",  zone:"strait"},
-  {name:"LNG QATARI MOON",     type:"tanker",  flag:"QAT", dwt:170000, dest:"S.KOREA",    zone:"strait"},
-  {name:"HMAS WARRAMUNGA",     type:"warship", flag:"AUS", dwt:6000,   dest:"TRANSIT",    zone:"strait"},
-  {name:"USS PHILIPPINE SEA",  type:"warship", flag:"USA", dwt:10000,  dest:"TRANSIT",    zone:"strait"},
-  {name:"MT OCEAN EMPRESS",    type:"tanker",  flag:"GRC", dwt:305000, dest:"PIRAEUS",    zone:"strait"},
-  {name:"MV SILK ROAD",        type:"cargo",   flag:"CHN", dwt:85000,  dest:"SHANGHAI",   zone:"strait"},
-  // Persian Gulf upstream
-  {name:"MT BAHRAIN SPIRIT",   type:"tanker",  flag:"BHR", dwt:240000, dest:"BAHRAIN",    zone:"gulf"},
-  {name:"MT RIYADH",           type:"tanker",  flag:"KSA", dwt:260000, dest:"YOKOHAMA",   zone:"gulf"},
-  {name:"MT KUWAIT PRIDE",     type:"tanker",  flag:"KWT", dwt:300000, dest:"ROTTERDAM",  zone:"gulf"},
-  {name:"MV ABU DHABI STAR",   type:"cargo",   flag:"UAE", dwt:58000,  dest:"HAMBURG",    zone:"gulf"},
-  {name:"MT RAS LAFFAN",       type:"tanker",  flag:"QAT", dwt:145000, dest:"JAPAN",      zone:"gulf"},
-  {name:"MV GULF PIONEER",     type:"cargo",   flag:"UAE", dwt:72000,  dest:"COLOMBO",    zone:"gulf"},
-  // Gulf of Oman downstream
-  {name:"MT KISH ISLAND",      type:"tanker",  flag:"IRN", dwt:195000, dest:"SINGAPORE",  zone:"oman"},
-  {name:"MV PACIFIC DRAGON",   type:"cargo",   flag:"PAN", dwt:96000,  dest:"BUSAN",      zone:"oman"},
-  {name:"MT ARABIAN GLORY",    type:"tanker",  flag:"UAE", dwt:350000, dest:"NEW YORK",   zone:"oman"},
-  {name:"MV GOLDEN GATE",      type:"cargo",   flag:"LBR", dwt:55000,  dest:"MUMBAI",     zone:"oman"},
-  {name:"MT ZAGROS",           type:"tanker",  flag:"IRN", dwt:175000, dest:"KHARG IS.",  zone:"oman"},
-  {name:"MV MUSANDAM",         type:"cargo",   flag:"OMN", dwt:41000,  dest:"SALALAH",    zone:"oman"},
-  // Unknown
-  {name:"??? UNIDENT-447",     type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN",    zone:"strait"},
-  {name:"??? SHADOW-12",       type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN",    zone:"strait"},
+  // === STRAIT TRANSIT VESSELS ===
+  {name:"MT GULF EXPLORER",    type:"tanker",  flag:"UAE", dwt:320000, dest:"FUJAIRAH",    zone:"strait", isIn:true},
+  {name:"MT AL MARJAN",         type:"tanker",  flag:"KSA", dwt:280000, dest:"JEDDAH",      zone:"strait", isIn:false},
+  {name:"LNG HORMUZ STAR",      type:"tanker",  flag:"QAT", dwt:155000, dest:"JAPAN",       zone:"strait", isIn:false},
+  {name:"MV DUBAI TRADER",      type:"cargo",   flag:"UAE", dwt:45000,  dest:"DUBAI",       zone:"strait", isIn:true},
+  {name:"MT PERSIAN PRIDE",     type:"tanker",  flag:"IRN", dwt:310000, dest:"CHINA",       zone:"strait", isIn:false},
+  {name:"MV KHALIFA BRIDGE",    type:"cargo",   flag:"UAE", dwt:62000,  dest:"MUSCAT",      zone:"strait", isIn:true},
+  {name:"MT SULTAN",            type:"tanker",  flag:"KWT", dwt:290000, dest:"ROTTERDAM",   zone:"strait", isIn:false},
+  {name:"LNG QATARI MOON",      type:"tanker",  flag:"QAT", dwt:170000, dest:"S.KOREA",     zone:"strait", isIn:false},
+  {name:"HMAS WARRAMUNGA",      type:"warship", flag:"AUS", dwt:6000,   dest:"TRANSIT",     zone:"strait", isIn:true},
+  {name:"USS PHILIPPINE SEA",   type:"warship", flag:"USA", dwt:10000,  dest:"TRANSIT",     zone:"strait", isIn:false},
+  {name:"MT OCEAN EMPRESS",     type:"tanker",  flag:"GRC", dwt:305000, dest:"PIRAEUS",     zone:"strait", isIn:false},
+  {name:"MV SILK ROAD",         type:"cargo",   flag:"CHN", dwt:85000,  dest:"SHANGHAI",    zone:"strait", isIn:true},
+  {name:"??? UNIDENT-447",      type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN",     zone:"strait", isIn:true},
+  {name:"??? SHADOW-12",        type:"unknown", flag:"N/A", dwt:0,      dest:"UNKNOWN",     zone:"strait", isIn:false},
+
+  // === PERSIAN GULF — underway ===
+  {name:"MT BAHRAIN SPIRIT",    type:"tanker",  flag:"BHR", dwt:240000, dest:"BAHRAIN",     zone:"gulf",   port:"rasLaffan"},
+  {name:"MT RIYADH",            type:"tanker",  flag:"KSA", dwt:260000, dest:"YOKOHAMA",    zone:"gulf",   port:"jubail"},
+  {name:"MT KUWAIT PRIDE",      type:"tanker",  flag:"KWT", dwt:300000, dest:"ROTTERDAM",   zone:"gulf",   port:"kuwait"},
+  {name:"MV ABU DHABI STAR",    type:"cargo",   flag:"UAE", dwt:58000,  dest:"HAMBURG",     zone:"gulf",   port:"abuDhabi"},
+  {name:"MT RAS LAFFAN",        type:"tanker",  flag:"QAT", dwt:145000, dest:"JAPAN",       zone:"gulf",   port:"rasLaffan"},
+  {name:"MV GULF PIONEER",      type:"cargo",   flag:"UAE", dwt:72000,  dest:"COLOMBO",     zone:"gulf",   port:"dubai"},
+  {name:"MT KHARG ISLAND",      type:"tanker",  flag:"IRN", dwt:285000, dest:"CHINA",       zone:"gulf",   port:"kharg"},
+  {name:"MT ABADAN",            type:"tanker",  flag:"IRN", dwt:175000, dest:"INDIA",       zone:"gulf",   port:"basra"},
+  {name:"MV DOHA EXPRESS",      type:"cargo",   flag:"QAT", dwt:38000,  dest:"KARACHI",     zone:"gulf",   port:"doha"},
+  {name:"MT BASRA PIONEER",     type:"tanker",  flag:"IRQ", dwt:310000, dest:"ROTTERDAM",   zone:"gulf",   port:"basra"},
+  {name:"MV JUBAIL STAR",       type:"cargo",   flag:"KSA", dwt:52000,  dest:"SINGAPORE",   zone:"gulf",   port:"jubail"},
+  {name:"MT BANDAR SPIRIT",     type:"tanker",  flag:"IRN", dwt:160000, dest:"CHINA",       zone:"gulf",   port:"bandarAbbas"},
+
+  // === PERSIAN GULF — anchored near ports ===
+  {name:"MT KUWAIT STAR",       type:"tanker",  flag:"KWT", dwt:320000, dest:"LOADING",     zone:"gulf",   port:"kuwait",     anchored:true},
+  {name:"MT LAFFAN GAS",        type:"tanker",  flag:"QAT", dwt:140000, dest:"LOADING",     zone:"gulf",   port:"rasLaffan",  anchored:true},
+  {name:"MV DUBAI PORT",        type:"cargo",   flag:"UAE", dwt:44000,  dest:"DISCHARGING", zone:"gulf",   port:"dubai",      anchored:true},
+  {name:"MT JUBAIL CRUDE",      type:"tanker",  flag:"KSA", dwt:295000, dest:"LOADING",     zone:"gulf",   port:"jubail",     anchored:true},
+  {name:"MT BUSHEHR",           type:"tanker",  flag:"IRN", dwt:190000, dest:"LOADING",     zone:"gulf",   port:"bushehr",    anchored:true},
+
+  // === GULF OF OMAN — underway ===
+  {name:"MT KISH ISLAND",       type:"tanker",  flag:"IRN", dwt:195000, dest:"SINGAPORE",   zone:"oman",   port:"khorFakkan"},
+  {name:"MV PACIFIC DRAGON",    type:"cargo",   flag:"PAN", dwt:96000,  dest:"BUSAN",       zone:"oman",   port:"sohar"},
+  {name:"MT ARABIAN GLORY",     type:"tanker",  flag:"UAE", dwt:350000, dest:"NEW YORK",    zone:"oman",   port:"fujairah"},
+  {name:"MV GOLDEN GATE",       type:"cargo",   flag:"LBR", dwt:55000,  dest:"MUMBAI",      zone:"oman",   port:"muscat"},
+  {name:"MT ZAGROS",            type:"tanker",  flag:"IRN", dwt:175000, dest:"KHARG IS.",   zone:"oman",   port:"bandarAbbas"},
+  {name:"MV MUSANDAM",          type:"cargo",   flag:"OMN", dwt:41000,  dest:"SALALAH",     zone:"oman",   port:"muscat"},
+  {name:"MT SOHAR SPIRIT",      type:"tanker",  flag:"OMN", dwt:220000, dest:"JAPAN",       zone:"oman",   port:"sohar"},
+  {name:"MV MUSCAT TRADER",     type:"cargo",   flag:"OMN", dwt:63000,  dest:"DUBAI",       zone:"oman",   port:"muscat"},
+
+  // === GULF OF OMAN — anchored ===
+  {name:"MT FUJAIRAH ANCHOR",   type:"tanker",  flag:"UAE", dwt:305000, dest:"BUNKERING",   zone:"oman",   port:"fujairah",   anchored:true},
+  {name:"MV KHOR FAKKAN",       type:"cargo",   flag:"UAE", dwt:78000,  dest:"DISCHARGING", zone:"oman",   port:"khorFakkan", anchored:true},
+  {name:"MT MUSCAT BAY",        type:"tanker",  flag:"OMN", dwt:250000, dest:"LOADING",     zone:"oman",   port:"muscat",     anchored:true},
 ];
 
 const TC = {tanker:"#00d4ff",cargo:"#00ff99",warship:"#ff2b2b",unknown:"#ffaa00",dark:"#ff6600"};
@@ -641,24 +767,55 @@ function hdg(wps,t){
   return (Math.atan2(lo-lo0,la-la0)*180/Math.PI+360)%360;
 }
 
+function rnd(min,max){return min+Math.random()*(max-min);}
+
 function spawnVessel(d,i){
-  const isIn=Math.random()>0.5, wps=isIn?WP_IN:WP_OUT;
-  let prog;
-  // Gulf vessels: spawn in western 20% of route (near Kuwait/Qatar/UAE ports)
-  if(d.zone==='gulf') prog=Math.random()*0.20;
-  // Oman vessels: spawn in eastern 20% of route (Gulf of Oman / Arabian Sea)
-  else if(d.zone==='oman') prog=0.80+Math.random()*0.20;
-  // Strait vessels: spread through middle 60%
-  else prog=0.20+Math.random()*0.60;
   const [spMin,spMax]=SR[d.type]||[8,14];
-  const speed=spMin+Math.random()*(spMax-spMin);
-  const [lat,lng]=lerpWP(wps,prog);
+  const speed = d.anchored ? rnd(0,0.5) : spMin+Math.random()*(spMax-spMin);
+
+  let lat, lng, heading, isIn=d.isIn!==undefined?d.isIn:Math.random()>0.5;
+
+  if(d.zone==='strait'){
+    // Strait vessels follow the transit lanes
+    const wps = isIn ? WP_IN : WP_OUT;
+    const prog = 0.30 + Math.random()*0.40; // spread through strait middle
+    const pos = lerpWP(wps, prog);
+    lat = pos[0] + rnd(-0.04, 0.04);
+    lng = pos[1] + rnd(-0.04, 0.04);
+    heading = isIn ? 300 : 120; // inbound=NW, outbound=SE
+    return {
+      id:`V${i}`,...d, lat, lng, speed, isIn, prog, wps,
+      heading, mmsi:`45${Math.floor(Math.random()*9e6+1e6)}`,
+      imo:`IMO${Math.floor(Math.random()*9e6+1e6)}`,
+      status: speed<1 ? 'ANCHORED':'UNDERWAY',
+      trail:[], isDark:false, darkDuration:0, isReal:false,
+    };
+  }
+
+  // Port-based vessels — scatter around port coordinates
+  const port = PORTS[d.port] || PORTS.dubai;
+  const scatter = d.anchored ? 0.08 : 0.25; // anchored tight, underway spread out
+  lat = port.lat + rnd(-scatter, scatter);
+  lng = port.lng + rnd(-scatter, scatter);
+
+  // Gulf vessels head SE toward strait (outbound) or NW away from it (inbound at port)
+  // Oman vessels head SW toward strait or NE away
+  if(d.zone==='gulf'){
+    heading = isIn ? rnd(120,160) : rnd(290,340); // toward/away from strait
+  } else {
+    heading = isIn ? rnd(290,330) : rnd(110,150);
+  }
+
   return {
-    id:`V${i}`,...d, lat,lng,speed,isIn,prog,wps,
-    mmsi:`45${Math.floor(Math.random()*9e6+1e6)}`,
+    id:`V${i}`,...d, lat, lng, speed,
+    isIn, prog:0, wps: isIn?WP_IN:WP_OUT,
+    heading, mmsi:`45${Math.floor(Math.random()*9e6+1e6)}`,
     imo:`IMO${Math.floor(Math.random()*9e6+1e6)}`,
-    status:speed<3?'ANCHORED':'UNDERWAY',
-    trail:[],isDark:false,darkDuration:0,isReal:false,
+    status: d.anchored||speed<1 ? 'ANCHORED':'UNDERWAY',
+    trail:[], isDark:false, darkDuration:0, isReal:false,
+    // Port vessels drift slowly rather than following waypoints
+    driftLat: rnd(-0.0008,0.0008),
+    driftLng: rnd(-0.0008,0.0008),
   };
 }
 
@@ -680,7 +837,7 @@ function moveVessels(){
 
 let map;
 function initMap(){
-  map=L.map('map',{center:[26.0,56.8],zoom:6,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:[26.0,55.0],zoom:5,zoomControl:false,attributionControl:false});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:14,opacity:0.9}).addTo(map);
   L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',{maxZoom:14,opacity:0.4}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
@@ -688,18 +845,16 @@ function initMap(){
 }
 
 function drawLanes(){
-  L.polyline(WP_IN, {color:'#00d4ff',weight:1.5,opacity:.28,dashArray:'8 5'}).addTo(map);
-  L.polyline(WP_OUT,{color:'#00ff99',weight:1.5,opacity:.28,dashArray:'8 5'}).addTo(map);
-  // Strait name
-  L.marker([26.38,56.88],{icon:L.divIcon({html:'<div style="color:rgba(0,212,255,.4);font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:5px;white-space:nowrap;transform:translateX(-50%)">STRAIT OF HORMUZ</div>',className:'',iconSize:[0,0]})}).addTo(map);
-  // Lane labels
-  L.marker([26.22,57.5],{icon:L.divIcon({html:'<div style="color:rgba(0,212,255,.4);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap">← INBOUND LANE</div>',className:'',iconSize:[0,0]})}).addTo(map);
-  L.marker([26.52,57.2],{icon:L.divIcon({html:'<div style="color:rgba(0,255,153,.4);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap">OUTBOUND LANE →</div>',className:'',iconSize:[0,0]})}).addTo(map);
-  // Zone labels - large and visible
-  L.marker([27.40,53.20],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00ff99;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,255,153,.9),0 2px 6px rgba(0,0,0,1)">PERSIAN GULF</div><div style="color:rgba(0,255,153,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">LOADING TERMINAL ZONE</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
-  L.marker([24.20,59.00],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00d4ff;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,212,255,.9),0 2px 6px rgba(0,0,0,1)">GULF OF OMAN</div><div style="color:rgba(0,212,255,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">INDIAN OCEAN APPROACH</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
-  // Narrows marker
-  L.marker([26.52,56.32],{icon:L.divIcon({html:'<div style="color:rgba(255,170,0,.45);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap;letter-spacing:1px">▼ NARROWS</div>',className:'',iconSize:[0,0]})}).addTo(map);
+  L.polyline(WP_IN, {color:'#00d4ff',weight:1.5,opacity:.35,dashArray:'8 5'}).addTo(map);
+  L.polyline(WP_OUT,{color:'#00ff99',weight:1.5,opacity:.35,dashArray:'8 5'}).addTo(map);
+  // Strait of Hormuz label
+  L.marker([26.38,56.60],{icon:L.divIcon({html:'<div style="color:rgba(0,212,255,.6);font-family:Bebas Neue,sans-serif;font-size:13px;letter-spacing:4px;white-space:nowrap;transform:translateX(-50%);text-shadow:0 1px 4px rgba(0,0,0,1)">STRAIT OF HORMUZ</div>',className:'',iconSize:[0,0]})}).addTo(map);
+  // Narrows
+  L.marker([26.55,56.15],{icon:L.divIcon({html:'<div style="color:rgba(255,170,0,.7);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,1)">▼ NARROWS</div>',className:'',iconSize:[0,0]})}).addTo(map);
+  // PERSIAN GULF label — correctly placed WEST in the actual Persian Gulf (near Bahrain/Kuwait)
+  L.marker([27.80,50.50],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00ff99;font-family:Bebas Neue,sans-serif;font-size:20px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 16px rgba(0,255,153,1),0 2px 8px rgba(0,0,0,1)">PERSIAN GULF</div><div style="color:rgba(0,255,153,.8);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,1)">LOADING TERMINAL ZONE · KUWAIT/BAHRAIN/QATAR</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
+  // GULF OF OMAN label — correctly placed EAST/SOUTHEAST
+  L.marker([23.80,59.50],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00d4ff;font-family:Bebas Neue,sans-serif;font-size:20px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 16px rgba(0,212,255,1),0 2px 8px rgba(0,0,0,1)">GULF OF OMAN</div><div style="color:rgba(0,212,255,.8);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,1)">INDIAN OCEAN APPROACH</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
 }
 
 function renderVessels(){
@@ -758,13 +913,97 @@ function renderList(){
     </div>`).join('');
 }
 
+// ═══════════════════════════════════════════════════════
+// ANALYTICS ENGINE
+// All figures are estimates based on vessel count × avg DWT
+// Real baseline: Hormuz carries ~17 MBD crude + 20% world LNG
+// ═══════════════════════════════════════════════════════
+const AVG_TANKER_BARRELS = 2000000; // avg VLCC = 2M barrels
+const AVG_LNG_BCF = 3.4;            // avg LNG carrier bcf/day contribution
+const NORMAL_OIL_MBD = 17;          // million barrels/day baseline
+const NORMAL_LNG_BCF = 1.8;         // bcf/day baseline
+const AVG_CARGO_VALUE_B = 0.18;     // $B per cargo vessel average
+
+function updateAnalytics(){
+  const tankers   = vessels.filter(v=>v.type==='tanker'&&!v.isDark);
+  const lngShips  = vessels.filter(v=>v.name.includes('LNG')&&!v.isDark);
+  const cargo     = vessels.filter(v=>v.type==='cargo'&&!v.isDark);
+  const dark      = vessels.filter(v=>v.isDark);
+  const anchored  = vessels.filter(v=>v.status==='ANCHORED');
+  const slow      = vessels.filter(v=>v.speed>0&&v.speed<6&&v.status!=='ANCHORED');
+  const outTankers= tankers.filter(v=>!v.isIn);
+  const inCargo   = cargo.filter(v=>v.isIn);
+
+  // OIL FLOW estimate — outbound tankers × avg cargo × speed factor
+  const speedFactor = Math.min(1, vessels.reduce((s,v)=>s+v.speed,0) / (vessels.length * 13));
+  const oilMBD = ((outTankers.length * AVG_TANKER_BARRELS) / 1e6 * speedFactor).toFixed(1);
+  const lngBCF = ((lngShips.filter(v=>!v.isIn).length * AVG_LNG_BCF) * speedFactor).toFixed(1);
+  const worldPct = ((oilMBD / 100) * (100/NORMAL_OIL_MBD) * 20).toFixed(1); // ~20% world supply
+  const flowPct  = Math.min(100, (oilMBD / NORMAL_OIL_MBD * 100)).toFixed(0);
+
+  document.getElementById('oilOut').textContent    = oilMBD;
+  document.getElementById('lngOut').textContent    = lngBCF;
+  document.getElementById('cargoIn').textContent   = inCargo.length;
+  document.getElementById('worldShare').textContent= worldPct;
+  document.getElementById('flowPct').textContent   = flowPct+'%';
+  document.getElementById('flowBar').style.width   = flowPct+'%';
+  document.getElementById('flowBar').style.background =
+    flowPct > 75 ? 'linear-gradient(90deg,var(--tanker),var(--green))' :
+    flowPct > 45 ? 'linear-gradient(90deg,var(--amber),#ff8800)' :
+    'var(--red)';
+
+  // STRANDED CARGO
+  const strandedVal = ((anchored.length + slow.length) * AVG_CARGO_VALUE_B).toFixed(1);
+  document.getElementById('strandAnc').textContent  = anchored.length;
+  document.getElementById('strandSlow').textContent = slow.length;
+  document.getElementById('strandVal').textContent  = '$'+strandedVal+'B';
+  const strandNote =
+    anchored.length + slow.length === 0
+      ? 'All vessels underway. No significant cargo delays detected.'
+      : anchored.length > 4
+      ? `⚠ ${anchored.length} vessels anchored — est. $${strandedVal}B cargo waiting. Possible port congestion or loading delays.`
+      : `${anchored.length} anchored, ${slow.length} slow. Est. $${strandedVal}B in delayed cargo. Normal operational hold.`;
+  document.getElementById('strandNote').textContent = strandNote;
+
+  // RISK INDEX — composite score
+  const darkRate   = dark.length / vessels.length;
+  const slowRate   = slow.length / vessels.length;
+  const flowDrop   = Math.max(0, 1 - oilMBD / NORMAL_OIL_MBD);
+  const riskNum    = Math.round((darkRate*40 + slowRate*20 + flowDrop*30 + (anchored.length/vessels.length)*10) * 100);
+  const riskCapped = Math.min(100, riskNum);
+  const riskLabel  = riskCapped < 20 ? 'LOW' : riskCapped < 45 ? 'MODERATE' : riskCapped < 70 ? 'ELEVATED' : 'CRITICAL';
+  const riskColor  = riskCapped < 20 ? 'var(--green)' : riskCapped < 45 ? 'var(--amber)' : riskCapped < 70 ? '#ff8800' : 'var(--red)';
+  document.getElementById('riskBar').style.width      = riskCapped+'%';
+  document.getElementById('riskBar').style.background = riskColor;
+  document.getElementById('riskVal').textContent      = riskLabel;
+  document.getElementById('riskVal').style.color      = riskColor;
+  document.getElementById('riskScore').textContent    = riskCapped;
+  document.getElementById('riskScore').style.color    = riskColor;
+  document.getElementById('congScore').textContent    = slow.length > 3 ? 'HIGH' : slow.length > 1 ? 'MOD' : 'LOW';
+  document.getElementById('darkScore').textContent    = (darkRate*100).toFixed(0)+'%';
+
+  // REGIONAL BREAKDOWN — cargo by destination region
+  const regions = [
+    {label:'EAST ASIA →',   color:'#00d4ff', vessels: vessels.filter(v=>['JAPAN','CHINA','S.KOREA','SINGAPORE','BUSAN','SHANGHAI'].some(d=>v.dest.includes(d)))},
+    {label:'EUROPE →',      color:'#00ff99', vessels: vessels.filter(v=>['ROTTERDAM','HAMBURG','PIRAEUS','JEDDAH'].some(d=>v.dest.includes(d)))},
+    {label:'GULF PORTS ←',  color:'#ffaa00', vessels: vessels.filter(v=>['DUBAI','BAHRAIN','FUJAIRAH','MUSCAT','COLOMBO','BAHRAIN','KHARG'].some(d=>v.dest.includes(d)))},
+    {label:'AMERICAS →',    color:'#ff6600', vessels: vessels.filter(v=>['NEW YORK','ROTTERDAM'].some(d=>v.dest.includes(d)))},
+  ];
+  const maxV = Math.max(...regions.map(r=>r.vessels.length), 1);
+  document.getElementById('regionBars').innerHTML = regions.map(r=>`
+    <div class="rbar-row">
+      <div class="rbar-label"><span>${r.label}</span><span style="color:${r.color}">${r.vessels.length} vessels · est. ${(r.vessels.filter(v=>v.type==='tanker').length * 2).toFixed(0)}M bbl</span></div>
+      <div class="rbar-track"><div class="rbar-fill" style="width:${Math.round(r.vessels.length/maxV*100)}%;background:${r.color}40;border-right:2px solid ${r.color}"></div></div>
+    </div>`).join('');
+}
+
 function updateStats(){
   const total=vessels.length;
   const tankers=vessels.filter(v=>v.type==='tanker').length;
   const avg=vessels.reduce((s,v)=>s+v.speed,0)/total;
   const inb=vessels.filter(v=>v.isIn&&v.speed>=3&&!v.isDark).length;
   const out=vessels.filter(v=>!v.isIn&&v.speed>=3&&!v.isDark).length;
-  const anc=vessels.filter(v=>v.speed<3).length;
+  const anc=vessels.filter(v=>v.status==='ANCHORED').length;
   const dark=vessels.filter(v=>v.isDark).length;
   document.getElementById('sTotal').textContent=total;
   document.getElementById('sTank').textContent=tankers;
@@ -777,6 +1016,8 @@ function updateStats(){
   document.getElementById('sbB').style.width=`${Math.min(100,out/M*100)}%`;
   document.getElementById('ancB').style.width=`${Math.min(100,anc/M*100)}%`;
   document.getElementById('dkB').style.width=`${Math.min(100,dark/4*100)}%`;
+  updateAnalytics();
+}
   const delta=((total-BASELINE)/BASELINE*100).toFixed(1);
   const ar=document.getElementById('tArr'),lb=document.getElementById('tLbl'),sb=document.getElementById('tSub');
   if(dark>2){ar.textContent='⚠';ar.className='ta';ar.style.color='#ff6600';lb.textContent=`${dark} DARK VESSELS ACTIVE`;sb.textContent='AIS transponders off — monitoring';}
@@ -940,14 +1181,16 @@ function tick(){
   moveVessels();renderVessels();updateStats();runAlerts();runDarkLogic();drawSpk();
   sparkData.push(vessels.length+(Math.random()-.5)*1.5);sparkData.shift();
   if(tickN%8===0)renderList();
-  if(tickN%25===0){hourly.shift();hourly.push(vessels.length+Math.round((Math.random()-.5)*5));drawHourly();}
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  initMap();initVessels();renderList();updateStats();drawSpk();drawHourly();
-  setTimeout(()=>pushAlert('info','SYSTEM','Tracker online. Simulation mode. Paste AISStream.io key for live vessel data. Click ? GUIDE for full documentation.'),400);
-  setTimeout(()=>pushAlert('info','COVERAGE','Monitoring: Persian Gulf → Strait of Hormuz → Gulf of Oman. All three zones active.'),1200);
-  setTimeout(()=>pushAlert('info','TRANSIT','MT GULF EXPLORER inbound narrows at 13.2 kn, bound for FUJAIRAH.'),2000);
+  const SAVED_KEY = '6aec39c94d240b94fcaf9c1060a5c64aa525de8b';
+  document.getElementById('aisKey').value = SAVED_KEY;
+  initMap();initVessels();renderList();updateStats();drawSpk();
+  setTimeout(()=>pushAlert('info','SYSTEM','Tracker online. Persian Gulf · Strait of Hormuz · Gulf of Oman active.'),400);
+  setTimeout(()=>pushAlert('info','OIL FLOW','Est. 14-18 MBD crude transiting outbound. 20% of global oil supply under monitoring.'),1400);
+  setTimeout(()=>pushAlert('info','LNG','Qatar RasGas + ADNOC LNG carriers active. Outbound to East Asia.'),2200);
+  setTimeout(()=>connectAIS(), 1800);
   setInterval(tick,180);setInterval(clockTick,1000);clockTick();
 });
 </script>
