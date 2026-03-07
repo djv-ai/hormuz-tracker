@@ -537,44 +537,56 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 // Extended west to 54.5°E (Persian Gulf) and east to 59.5°E (Gulf of Oman)
 // ═══════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════
+// CORRECTED WAYPOINTS — proper curve matching real strait geometry
+//
+// Real shape: vessels come from SOUTH-SOUTHEAST in Gulf of Oman,
+// curve NORTH around Musandam Peninsula, then head NORTHWEST
+// into Persian Gulf toward Kuwait/Qatar/Bahrain terminals.
+// This creates a clear visible bend — NOT a straight line.
+//
+// Musandam tip: ~26.40°N 56.27°E  — lanes stay above 26.48°N here
+// Qeshm Island south coast: ~26.52°N 55.8-56.3°E — lanes stay south
+// ═══════════════════════════════════════════════════════════════════
+
 const WP_IN = [
-  [25.85, 59.50],  // Gulf of Oman - eastern approach
-  [25.90, 59.00],
-  [25.98, 58.50],
-  [26.08, 58.00],
-  [26.16, 57.70],
-  [26.24, 57.40],
-  [26.30, 57.10],
-  [26.36, 56.80],
-  [26.42, 56.55],  // Approaching narrows
-  [26.50, 56.32],  // *** NARROWS — deep channel, north of Musandam ***
-  [26.55, 56.12],  // Clearing peninsula
-  [26.60, 55.88],
-  [26.67, 55.62],  // Entering Persian Gulf
-  [26.75, 55.35],
-  [26.85, 55.00],
-  [27.00, 54.70],
-  [27.10, 54.50],  // Deep Persian Gulf
+  [24.20, 59.80],  // Arabian Sea / deep Gulf of Oman — FAR SOUTH
+  [24.60, 59.20],  // Gulf of Oman approach — heading NNW
+  [25.10, 58.70],
+  [25.55, 58.20],  // Turning more northward
+  [25.90, 57.80],
+  [26.15, 57.40],  // Bending northwest toward strait entrance
+  [26.30, 57.05],
+  [26.40, 56.72],
+  [26.46, 56.45],  // Approaching narrows — curving north
+  [26.50, 56.22],  // *** NARROWS — north of Musandam 26.40°N ***
+  [26.54, 55.98],  // Clearing — now heading more WEST-NORTHWEST
+  [26.62, 55.68],
+  [26.72, 55.30],  // Persian Gulf entry — route bends northwest
+  [26.90, 54.90],
+  [27.15, 54.45],  // Heading toward UAE/Oman terminals
+  [27.45, 53.90],
+  [27.70, 53.40],  // Deep Persian Gulf — northwest toward Qatar/Bahrain
 ];
 
 const WP_OUT = [
-  [27.10, 54.50],
-  [27.00, 54.70],
-  [26.88, 55.00],
-  [26.78, 55.35],
-  [26.70, 55.62],
-  [26.63, 55.88],
-  [26.58, 56.12],
-  [26.54, 56.32],  // *** NARROWS outbound — slightly north of inbound ***
-  [26.48, 56.55],
-  [26.42, 56.80],
-  [26.36, 57.10],
-  [26.30, 57.40],
-  [26.22, 57.70],
-  [26.14, 58.00],
-  [26.04, 58.50],
-  [25.96, 59.00],
-  [25.85, 59.50],
+  [27.70, 53.40],
+  [27.45, 53.90],
+  [27.18, 54.45],
+  [26.95, 54.90],
+  [26.76, 55.30],
+  [26.66, 55.68],
+  [26.58, 55.98],
+  [26.54, 56.22],  // *** NARROWS outbound — lanes ~0.04° apart ***
+  [26.50, 56.45],
+  [26.44, 56.72],
+  [26.34, 57.05],
+  [26.20, 57.40],
+  [25.95, 57.80],
+  [25.60, 58.20],
+  [25.15, 58.70],
+  [24.65, 59.20],
+  [24.20, 59.80],  // Back into Arabian Sea
 ];
 
 const VDATA = [
@@ -668,7 +680,7 @@ function moveVessels(){
 
 let map;
 function initMap(){
-  map=L.map('map',{center:[26.2,56.5],zoom:6,zoomControl:false,attributionControl:false});
+  map=L.map('map',{center:[26.0,56.8],zoom:6,zoomControl:false,attributionControl:false});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:14,opacity:0.9}).addTo(map);
   L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',{maxZoom:14,opacity:0.4}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
@@ -684,8 +696,8 @@ function drawLanes(){
   L.marker([26.22,57.5],{icon:L.divIcon({html:'<div style="color:rgba(0,212,255,.4);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap">← INBOUND LANE</div>',className:'',iconSize:[0,0]})}).addTo(map);
   L.marker([26.52,57.2],{icon:L.divIcon({html:'<div style="color:rgba(0,255,153,.4);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap">OUTBOUND LANE →</div>',className:'',iconSize:[0,0]})}).addTo(map);
   // Zone labels - large and visible
-  L.marker([26.80,53.50],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00ff99;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,255,153,.9),0 2px 6px rgba(0,0,0,1)">PERSIAN GULF</div><div style="color:rgba(0,255,153,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">LOADING TERMINAL ZONE</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
-  L.marker([24.50,58.50],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00d4ff;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,212,255,.9),0 2px 6px rgba(0,0,0,1)">GULF OF OMAN</div><div style="color:rgba(0,212,255,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">INDIAN OCEAN APPROACH</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
+  L.marker([27.40,53.20],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00ff99;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,255,153,.9),0 2px 6px rgba(0,0,0,1)">PERSIAN GULF</div><div style="color:rgba(0,255,153,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">LOADING TERMINAL ZONE</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
+  L.marker([24.20,59.00],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00d4ff;font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 14px rgba(0,212,255,.9),0 2px 6px rgba(0,0,0,1)">GULF OF OMAN</div><div style="color:rgba(0,212,255,.7);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,1)">INDIAN OCEAN APPROACH</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
   // Narrows marker
   L.marker([26.52,56.32],{icon:L.divIcon({html:'<div style="color:rgba(255,170,0,.45);font-family:JetBrains Mono,monospace;font-size:8px;white-space:nowrap;letter-spacing:1px">▼ NARROWS</div>',className:'',iconSize:[0,0]})}).addTo(map);
 }
