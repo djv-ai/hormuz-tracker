@@ -235,6 +235,89 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 /* Leaflet */
 .leaflet-tooltip{background:var(--surf2) !important;border:1px solid var(--border) !important;color:var(--text) !important;font-family:'JetBrains Mono',monospace !important;font-size:11px !important;border-radius:3px !important;padding:6px 10px !important;box-shadow:0 4px 16px rgba(0,0,0,.5) !important;}
 
+/* ═══════════════════════════════════════
+   EVALS / EVD BUTTONS (TOPBAR)
+═══════════════════════════════════════ */
+#evalsBtn{background:rgba(0,212,255,.12);border:1px solid var(--accent);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 12px;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap;font-weight:600;}
+#evalsBtn:hover{background:var(--accent);color:var(--bg);}
+#evdBtn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap;}
+#evdBtn.on{border-color:var(--green);color:var(--green);background:rgba(0,255,153,.08);}
+#evdBtn:hover{border-color:var(--text);color:var(--text);}
+
+/* EVIDENCE TAGS */
+.evd-tag{display:none;font-size:7px;padding:1px 4px;border-radius:2px;margin-left:3px;cursor:help;letter-spacing:1px;font-weight:700;vertical-align:middle;}
+body.evd-on .evd-tag{display:inline-block;}
+.evd-ais{background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.3);}
+.evd-calc{background:rgba(0,255,153,.15);color:var(--green);border:1px solid rgba(0,255,153,.3);}
+.evd-est{background:rgba(255,170,0,.15);color:var(--amber);border:1px solid rgba(255,170,0,.3);}
+
+/* SCENARIO BADGE */
+#scenarioBadge{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(255,170,0,.15);border:1px solid var(--amber);color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 18px;border-radius:2px;letter-spacing:2px;z-index:800;display:none;pointer-events:none;}
+#scenarioBadge.on{display:block;}
+
+/* ═══════════════════════════════════════
+   EVALS OVERLAY — light theme
+═══════════════════════════════════════ */
+#evalsOverlay{position:fixed;inset:0;background:#eef2f7;z-index:9000;display:none;overflow-y:auto;}
+#evalsOverlay.on{display:block;}
+#evalsInner{max-width:960px;margin:0 auto;padding:0 24px 60px;}
+.evals-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #c0d0e0;padding:22px 0 16px;margin-bottom:0;position:sticky;top:0;background:#eef2f7;z-index:10;}
+.evals-header h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:6px;color:#0a2540;}
+.evals-header p{font-size:11px;color:#4a6880;margin-top:4px;letter-spacing:1px;}
+#closeEvals{background:#0a2540;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px 20px;cursor:pointer;border-radius:4px;transition:all .2s;}
+#closeEvals:hover{background:#00a8cc;}
+.etab-bar{display:flex;gap:4px;border-bottom:2px solid #c0d0e0;margin-bottom:20px;padding-top:12px;}
+.etab{background:none;border:none;border-bottom:3px solid transparent;color:#4a6880;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;padding:8px 16px;cursor:pointer;transition:all .2s;margin-bottom:-2px;}
+.etab:hover{color:#0a2540;}
+.etab.active{color:#007baa;border-bottom-color:#007baa;font-weight:700;}
+.eval-card{background:#fff;border:1px solid #c8d8e8;border-radius:6px;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.eval-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.eval-cat{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;padding:3px 10px;border-radius:3px;}
+.eval-diff{font-size:8px;letter-spacing:2px;color:#6a90a8;}
+.eval-q-label{font-size:9px;letter-spacing:2px;color:#4a6880;margin-bottom:4px;font-weight:700;}
+.eval-q{font-size:12px;color:#0a2540;line-height:1.7;margin-bottom:10px;padding:8px 12px;background:#f0f6fa;border-radius:4px;border-left:3px solid #007baa;}
+.eval-gold-label{font-size:9px;letter-spacing:2px;color:#007744;margin-bottom:4px;font-weight:700;}
+.eval-gold{font-size:11px;color:#223344;line-height:1.75;padding:8px 12px;background:#f0faf6;border-radius:4px;border-left:3px solid #007744;}
+.eval-copy-btn{background:#f0f6fa;border:1px solid #c0d0e0;color:#4a6880;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 10px;cursor:pointer;border-radius:3px;margin-top:10px;transition:all .2s;}
+.eval-copy-btn:hover{background:#007baa;color:#fff;border-color:#007baa;}
+.eval-copy-btn.copied{background:#007744;color:#fff;border-color:#007744;}
+.evals-refresh-btn{background:#0a2540;border:none;color:#cce0f5;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;padding:6px 16px;cursor:pointer;border-radius:4px;transition:all .2s;}
+.evals-refresh-btn:hover{background:#007baa;}
+.scenario-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.scenario-btn{background:#fff;border:2px solid #c8d8e8;border-radius:6px;padding:14px 10px;cursor:pointer;transition:all .2s;text-align:center;font-family:'JetBrains Mono',monospace;}
+.scenario-btn:hover{border-color:#007baa;background:#f0f6fa;}
+.scenario-btn.active{border-color:#007baa;background:#e8f4fa;}
+.scenario-btn .sc-name{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:#0a2540;margin-bottom:4px;}
+.scenario-btn.active .sc-name{color:#007baa;}
+.scenario-btn .sc-factor{font-size:9px;color:#4a6880;margin-bottom:6px;letter-spacing:1px;}
+.scenario-btn .sc-risk{font-size:11px;font-weight:700;}
+.impact-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;}
+.impact-table th{font-size:9px;letter-spacing:2px;color:#4a6880;text-align:left;padding:6px 10px;border-bottom:2px solid #c0d0e0;background:#f0f6fa;}
+.impact-table td{font-size:11px;padding:7px 10px;border-bottom:1px solid #dde8f0;color:#223344;}
+.impact-table td.val-ok{color:#007744;font-weight:600;}
+.impact-table td.val-warn{color:#c07800;font-weight:700;}
+.impact-table td.val-crit{color:#aa0000;font-weight:700;}
+.impact-table tr:hover td{background:#f5f9fc;}
+.impact-caveat{background:#fff8e8;border:1px solid #e0c060;border-radius:4px;padding:10px 14px;margin-top:14px;font-size:11px;color:#5a4010;line-height:1.75;}
+.rubric-q-box{background:#f0f6fa;border:1px solid #c0d0e0;border-radius:6px;padding:14px 16px;margin-bottom:20px;}
+.rubric-q-box p{font-size:12px;color:#0a2540;line-height:1.7;margin:0;}
+.rubric-dim{display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:10px 14px;background:#fff;border:1px solid #c8d8e8;border-radius:6px;}
+.rubric-dim-name{font-size:11px;font-weight:700;color:#0a2540;min-width:155px;}
+.rubric-dim-desc{font-size:9px;color:#4a6880;flex:1;line-height:1.55;}
+.rub-score-btns{display:flex;gap:4px;}
+.rub-score-btn{width:32px;height:32px;border-radius:4px;border:2px solid #c8d8e8;background:#f5f9fc;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;color:#4a6880;}
+.rub-score-btn:hover{border-color:#007baa;color:#007baa;}
+.rub-score-btn.active{border-color:#007baa;background:#007baa;color:#fff;}
+.rubric-total{display:flex;align-items:center;gap:16px;padding:14px 16px;background:#0a2540;border-radius:6px;margin-top:16px;}
+.rubric-total .rt-score{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;color:#00d4ff;}
+.rubric-total .rt-max{font-size:12px;color:rgba(0,212,255,.5);margin-top:2px;}
+.rubric-total .rt-verdict{font-size:11px;color:#cce0f5;line-height:1.65;flex:1;}
+.rubric-export-btn{background:rgba(0,212,255,.15);border:1px solid #00d4ff;color:#00d4ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 14px;cursor:pointer;border-radius:3px;transition:all .2s;letter-spacing:1px;white-space:nowrap;}
+.rubric-export-btn:hover{background:rgba(0,212,255,.3);}
+.rubric-pick-btn{background:#f0f6fa;border:1px solid #c0d0e0;color:#4a6880;font-family:'JetBrains Mono',monospace;font-size:9px;padding:4px 12px;cursor:pointer;border-radius:3px;letter-spacing:1px;transition:all .2s;}
+.rubric-pick-btn:hover{background:#007baa;color:#fff;border-color:#007baa;}
+@media (max-width:768px){.scenario-grid{grid-template-columns:1fr 1fr;}.rubric-dim{flex-wrap:wrap;}.rubric-dim-name{min-width:unset;}}
+
 /* ═══════════════════════════════════
    MOBILE — stack layout, enable scroll
 ═══════════════════════════════════ */
@@ -292,6 +375,8 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
     </div>
   </div>
   <div class="dvd"></div>
+  <button id="evalsBtn" onclick="toggleEvals()">⊞ EVALS</button>
+  <button id="evdBtn" onclick="toggleEvidence()">EVD: OFF</button>
   <button id="helpBtn" onclick="toggleHelp()">? GUIDE</button>
   <span class="b-ok" id="badge">NOMINAL</span>
   <span id="clock">--:--:-- UTC</span>
@@ -352,9 +437,9 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
         <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:36px;text-align:right;" id="riskVal">LOW</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
-        <div class="astat"><div class="astat-v" id="riskScore">12</div><div class="astat-l">RISK /100</div></div>
-        <div class="astat"><div class="astat-v" id="congScore" style="color:var(--amber)">--</div><div class="astat-l">CONGESTION</div></div>
-        <div class="astat"><div class="astat-v" id="darkScore" style="color:var(--dark)">--</div><div class="astat-l">DARK RATE</div></div>
+        <div class="astat"><div class="astat-v" id="riskScore">12</div><div class="astat-l">RISK /100<span class="evd-tag evd-calc" title="Formula: (dark_rate×40 + slow_rate×20 + flow_drop×30 + anchored_rate×10) × 100. Weighted composite of 4 AIS-derived signals.">CALC</span></div></div>
+        <div class="astat"><div class="astat-v" id="congScore" style="color:var(--amber)">--</div><div class="astat-l">CONGESTION<span class="evd-tag evd-ais" title="Source: AIS vessel speeds. HIGH = >3 vessels <6kn, MOD = 1–3, LOW = 0. Based on live position reports.">AIS</span></div></div>
+        <div class="astat"><div class="astat-v" id="darkScore" style="color:var(--dark)">--</div><div class="astat-l">DARK RATE<span class="evd-tag evd-ais" title="Source: AIS signal loss. dark_count / total_vessels × 100. Each dark vessel = AIS transponder off while underway.">AIS</span></div></div>
       </div>
     </div>
 
@@ -363,22 +448,22 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
       <div class="st">Oil &amp; LNG Flow</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;">
         <div class="flowcard" style="border-color:rgba(0,212,255,.3)">
-          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">OUTBOUND CRUDE</div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">OUTBOUND CRUDE<span class="evd-tag evd-est" title="Estimate: outbound_tankers × 2M bbl × speed_factor. Speed_factor = avg_speed/13 kn. Baseline: 17 MBD per OPEC data.">EST</span></div>
           <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--tanker);line-height:1;" id="oilOut">--</div>
           <div style="font-size:9px;color:var(--muted);">MBD est.</div>
         </div>
         <div class="flowcard" style="border-color:rgba(0,255,153,.3)">
-          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">OUTBOUND LNG</div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">OUTBOUND LNG<span class="evd-tag evd-est" title="Estimate: LNG carriers outbound × 3.4 BCF/day × speed_factor. Baseline: 1.8 BCF/day per GIIGNL.">EST</span></div>
           <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--green);line-height:1;" id="lngOut">--</div>
           <div style="font-size:9px;color:var(--muted);">BCF/day est.</div>
         </div>
         <div class="flowcard" style="border-color:rgba(255,170,0,.3)">
-          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">INBOUND CARGO</div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">INBOUND CARGO<span class="evd-tag evd-ais" title="Source: AIS heading data. Inbound = course 180–360° (westward into Gulf). Count of non-dark cargo vessels.">AIS</span></div>
           <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--amber);line-height:1;" id="cargoIn">--</div>
           <div style="font-size:9px;color:var(--muted);">vessels</div>
         </div>
         <div class="flowcard" style="border-color:rgba(255,43,43,.3)">
-          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">WORLD OIL SHARE</div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;">WORLD OIL SHARE<span class="evd-tag evd-calc" title="Calc: (oilMBD/100) × (100/17) × 20. Assumes Hormuz = ~20% of global supply at 17 MBD baseline (IEA).">CALC</span></div>
           <div style="font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--red);line-height:1;" id="worldShare">--</div>
           <div style="font-size:9px;color:var(--muted);">% of supply</div>
         </div>
@@ -398,9 +483,9 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
     <div class="sec" style="padding:9px 13px 8px;">
       <div class="st">Stranded &amp; Waiting</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px;">
-        <div class="astat"><div class="astat-v" id="strandAnc" style="color:var(--amber)">--</div><div class="astat-l">ANCHORED</div></div>
-        <div class="astat"><div class="astat-v" id="strandSlow" style="color:var(--amber)">--</div><div class="astat-l">SLOW &lt;6KN</div></div>
-        <div class="astat"><div class="astat-v" id="strandVal" style="color:var(--red)">--</div><div class="astat-l">$B CARGO</div></div>
+        <div class="astat"><div class="astat-v" id="strandAnc" style="color:var(--amber)">--</div><div class="astat-l">ANCHORED<span class="evd-tag evd-ais" title="Source: AIS speed + status. Anchored = speed < 1 kn or AIS status 'AT ANCHOR'. Includes all vessel types.">AIS</span></div></div>
+        <div class="astat"><div class="astat-v" id="strandSlow" style="color:var(--amber)">--</div><div class="astat-l">SLOW &lt;6KN<span class="evd-tag evd-ais" title="Source: AIS speed over ground (SOG). Underway vessels with SOG 0–6 kn. Excludes anchored. Normal transit = 11–15 kn.">AIS</span></div></div>
+        <div class="astat"><div class="astat-v" id="strandVal" style="color:var(--red)">--</div><div class="astat-l">$B CARGO<span class="evd-tag evd-est" title="Estimate: (anchored + slow) × $180M avg cargo value. Rough proxy; actual value depends on commodity type and loading status.">EST</span></div></div>
       </div>
       <div style="font-size:9px;color:var(--muted);line-height:1.5;padding:5px 8px;background:var(--surf2);border-radius:3px;border:1px solid var(--border);" id="strandNote">
         Calculating stranded cargo value...
@@ -662,6 +747,73 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
     <div class="tip-box">
       <p><strong>TIP:</strong> The tracker runs fully in simulation without any account or key. For live data, use the provider dropdown and KEY field in the top bar — credentials are session-only and never saved. Click <strong>✕ CLOSE</strong> or press <strong>Escape</strong> to return to the tracker.</p>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCENARIO BADGE (bottom-centre map overlay)
+════════════════════════════════════════════════════════ -->
+<div id="scenarioBadge">▷ SCENARIO ACTIVE</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     EVALS FACTORY OVERLAY
+════════════════════════════════════════════════════════ -->
+<div id="evalsOverlay">
+  <div id="evalsInner">
+
+    <div class="evals-header">
+      <div>
+        <h2>EVALS FACTORY</h2>
+        <p>LLM EVALUATION TASK GENERATOR · HORMUZ MACRO RISK · LIVE DATA</p>
+      </div>
+      <button id="closeEvals" onclick="toggleEvals()">✕ CLOSE</button>
+    </div>
+
+    <div class="etab-bar">
+      <button class="etab active" id="tab-evals" onclick="switchEvalsTab('evals')">⊞ EVALS</button>
+      <button class="etab" id="tab-scenarios" onclick="switchEvalsTab('scenarios')">▷ SCENARIOS</button>
+      <button class="etab" id="tab-rubric" onclick="switchEvalsTab('rubric')">◈ RUBRIC</button>
+    </div>
+
+    <!-- ── EVALS TAB ─────────────────────────────────────────── -->
+    <div id="evalsTab" class="etab-pane">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <p style="font-size:11px;color:#4a6880">Auto-generated from live AIS data · <span id="evalsTimestamp">--</span></p>
+        <button class="evals-refresh-btn" onclick="generateAndRender()">↻ REFRESH EVALS</button>
+      </div>
+      <div id="evalCards"><!-- populated by JS --></div>
+      <div style="margin-top:20px;padding:12px 16px;background:#f0f6fa;border:1px solid #c0d0e0;border-radius:6px;">
+        <p style="font-size:10px;color:#4a6880;line-height:1.75;margin:0"><strong style="color:#0a2540">HOW TO USE:</strong> Each card is a prompt template — paste it into any LLM. The GOLD ANSWER is your reference for grading. Use the <strong style="color:#007baa">RUBRIC</strong> tab to score responses. The <strong style="color:#007baa">SCENARIOS</strong> tab shows market impact chains for stress-test questions. Hit ↻ REFRESH to regenerate with the current data snapshot.</p>
+      </div>
+    </div>
+
+    <!-- ── SCENARIOS TAB ──────────────────────────────────────── -->
+    <div id="scenariosTab" class="etab-pane" style="display:none">
+      <p style="font-size:11px;color:#4a6880;margin-bottom:16px;line-height:1.65">Stress-test LLM reasoning by toggling disruption scenarios. Selecting a scenario applies it to the live dashboard. Use the market impact table to check whether a model's reasoning chain is correct.</p>
+      <div class="scenario-grid" id="scenarioBtns"><!-- populated by JS --></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:4px;color:#6a90a8;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #c0d0e0;">FIRST-ORDER MARKET IMPACTS</div>
+      <table class="impact-table" id="impactTable"><!-- populated by JS --></table>
+      <div class="impact-caveat" id="impactCaveat"><!-- populated by JS --></div>
+    </div>
+
+    <!-- ── RUBRIC TAB ─────────────────────────────────────────── -->
+    <div id="rubricTab" class="etab-pane" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:11px;color:#4a6880">Score a model response against this eval task (0 = wrong, 1 = partial, 2 = correct):</div>
+        <button class="rubric-pick-btn" onclick="pickNewRubricQ()">↻ NEW QUESTION</button>
+      </div>
+      <div class="rubric-q-box">
+        <div style="font-size:9px;letter-spacing:2px;color:#007baa;font-weight:700;margin-bottom:6px" id="rubricQCat">---</div>
+        <p id="rubricQText">Loading…</p>
+      </div>
+      <div id="rubricDims"><!-- populated by JS --></div>
+      <div class="rubric-total">
+        <div><div class="rt-score" id="rubricScore">0</div><div class="rt-max">/10</div></div>
+        <div class="rt-verdict" id="rubricVerdict">Select scores above to begin grading.</div>
+        <button class="rubric-export-btn" onclick="exportRubric()">⊞ COPY JSON</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1073,6 +1225,7 @@ function moveVessels(){
     v.speed+=rnd(-0.15,0.15);
     const[mn,mx]=SR[v.isDark?'dark':v.type]||[8,14];
     v.speed=Math.max(mn,Math.min(mx,v.speed));
+    if(scenarioMaxSpd!==null&&v.type==='tanker'){v.speed=Math.min(scenarioMaxSpd,v.speed);}
     if(tickN%3===0){v.trail.push([v.lat,v.lng]);if(v.trail.length>25)v.trail.shift();}
   });
 }
@@ -1396,7 +1549,7 @@ function toggleHelp(){
   const o=document.getElementById('helpOverlay');
   o.classList.toggle('on');
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('helpOverlay').classList.remove('on');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('helpOverlay').classList.remove('on');document.getElementById('evalsOverlay').classList.remove('on');}});
 
 // ═══════════════════════════════════════════════════════════════
 // AIS — dual provider (aisstream.io primary, AISHub fallback)
@@ -1582,6 +1735,267 @@ function handleAIS(data, provider){
       else if(shipType>=35&&shipType<=37)v.type='warship';
     }
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVALS FACTORY — live-data LLM evaluation task generator
+// ═══════════════════════════════════════════════════════════════
+
+let evdOn = false;
+let activeScenario = 'normal';
+let scenarioMaxSpd = null;
+let rubricScores = [null,null,null,null,null];
+let rubricQIdx = 0;
+let cachedEvals = [];
+
+// ── Toggle overlays ──────────────────────────────────────────
+function toggleEvals(){
+  const o=document.getElementById('evalsOverlay');
+  if(!o.classList.contains('on')){generateAndRender();renderScenarios();initRubric();}
+  o.classList.toggle('on');
+}
+
+function toggleEvidence(){
+  evdOn=!evdOn;
+  document.body.classList.toggle('evd-on',evdOn);
+  const btn=document.getElementById('evdBtn');
+  btn.textContent=evdOn?'EVD: ON':'EVD: OFF';
+  btn.classList.toggle('on',evdOn);
+}
+
+function switchEvalsTab(t){
+  ['evals','scenarios','rubric'].forEach(id=>{
+    document.getElementById(id+'Tab').style.display=id===t?'':'none';
+    const b=document.getElementById('tab-'+id);
+    if(b)b.classList.toggle('active',id===t);
+  });
+}
+
+// ── Eval generation ──────────────────────────────────────────
+function generateEvals(){
+  const tankers   =vessels.filter(v=>v.type==='tanker'&&!v.isDark);
+  const dark      =vessels.filter(v=>v.isDark);
+  const anchored  =vessels.filter(v=>v.status==='ANCHORED');
+  const slow      =vessels.filter(v=>v.speed>0&&v.speed<6&&v.status!=='ANCHORED');
+  const outTankers=tankers.filter(v=>!v.isIn);
+  const avgSpd    =(vessels.reduce((s,v)=>s+v.speed,0)/vessels.length).toFixed(1);
+  const oilMBD    =parseFloat(document.getElementById('oilOut').textContent)||0;
+  const riskScore =parseInt(document.getElementById('riskScore').textContent)||0;
+  const riskLabel =document.getElementById('riskVal').textContent||'LOW';
+  const nSlowAnc  =slow.length+anchored.length;
+  const slowAncTk =vessels.filter(v=>(v.speed<6||v.status==='ANCHORED')&&v.type==='tanker').length;
+  const slowAncCg =vessels.filter(v=>(v.speed<6||v.status==='ANCHORED')&&v.type==='cargo').length;
+
+  return [
+    {
+      cat:'EXTRACTION',color:'#007baa',difficulty:'BASIC',
+      q:`You have access to live AIS data for the Strait of Hormuz region. How many vessels are currently slow (<6 kn) or anchored? Break down by vessel type.`,
+      gold:`${nSlowAnc} vessels are slow or anchored: ${anchored.length} anchored and ${slow.length} slow (<6 kn but underway). Breakdown: ${slowAncTk} tankers, ${slowAncCg} cargo vessels. Total fleet tracked: ${vessels.length} vessels. Note: anchored/slow status is derived from AIS speed-over-ground (SOG); a vessel at SOG <1 kn is classified anchored.`
+    },
+    {
+      cat:'CHANGE DETECTION',color:'#007744',difficulty:'INTERMEDIATE',
+      q:`Current Hormuz data: ${vessels.length} vessels, avg speed ${avgSpd} kn, ${dark.length} dark AIS, oil outbound ~${oilMBD} MBD, risk index ${riskScore}/100 (${riskLabel}). What signals would indicate material deterioration in the past 60 min? What would indicate a false alarm?`,
+      gold:`Deterioration signals: avg speed falling below 8 kn (currently ${avgSpd} kn), dark vessels rising above ${Math.max(dark.length+2,3)}, oil outbound falling below 12 MBD (currently ${oilMBD} MBD), tanker count dropping to <8 (currently ${tankers.length}). False alarm indicators: isolated speed drop without anchoring increase (weather/tidal), single dark event without pattern shift, outbound tanker count stable despite congestion reading. KEY UNCERTAINTY: speed drops cannot be attributed to threat vs seasonal Gulf of Oman monsoon without corroborating intelligence.`
+    },
+    {
+      cat:'CAUSAL REASONING',color:'#c07800',difficulty:'ADVANCED',
+      q:`If average vessel speed drops from ${avgSpd} kn to 5 kn and ${Math.max(dark.length+3,4)} tankers go dark simultaneously in the narrows, describe the risk chain from maritime signal to financial markets. Show each reasoning step.`,
+      gold:`Step 1 — Maritime signal: simultaneous speed drop + dark cluster inconsistent with weather; likely deliberate. Step 2 — Supply inference: outbound flow drops from ~${oilMBD} MBD toward 7–9 MBD; assuming 3-day backlog = ~${(oilMBD*3).toFixed(0)}M barrels delayed. Step 3 — Commodity: Brent/WTI spike $10–20/bbl on forward scarcity premium within hours of news. Step 4 — Tanker markets: VLCC spot rates +50–150%; Baltic Dirty Tanker Index surges on rerouting risk. Step 5 — Insurance: P&I/Lloyd's war-risk premiums rise 5–15×; some underwriters issue advisory. Step 6 — Macro: inflation breakevens +20–50 bps; EM oil-importer FX (INR, KRW) weaken; safe haven JPY/CHF/Gold bid. CANNOT CONCLUDE: magnitude without knowing Saudi spare capacity response, SPR release probability, or whether closure is sustained.`
+    },
+    {
+      cat:'MARKET MAPPING',color:'#bb4400',difficulty:'ADVANCED',
+      q:`Rank these instruments by reaction speed to a confirmed Hormuz disruption signal: Brent crude futures, tanker shipping rates, energy equity ETFs, Lloyd's marine insurance, 5yr inflation breakevens, EM credit spreads. Explain each transmission mechanism.`,
+      gold:`1st — Brent crude futures (minutes–hours): direct forward supply shock; futures price risk premium before physical tightening. 2nd — Tanker spot rates / BDTI (hours–1 day): operators reprice immediately at next fixture enquiry. 3rd — Energy equity ETFs/XLE (same day): equity markets open with Brent priced in; E&P benefit, refiners hit on feedstock uncertainty. 4th — Marine/war-risk insurance (1–3 days): Lloyd's syndicates convene; JWC advisory issued; premiums renegotiated. 5th — Inflation breakevens/TIPS (days–weeks): energy feeds CPI expectations with lag; 10yr BE widens. 6th — EM credit spreads (days–weeks): oil-importing sovereigns (India, S.Korea, Japan, Turkey) face larger CADs; sovereign CDS widens. CAVEAT: ranking flips on false signal — futures reverse fastest, insurance slowest.`
+    },
+    {
+      cat:'UNCERTAINTY DISCIPLINE',color:'#aa1111',difficulty:'EXPERT',
+      q:`What are the top 5 things you CANNOT conclude from Hormuz AIS data alone, even with ${dark.length} dark vessels, avg speed ${avgSpd} kn, and oil outbound ~${oilMBD} MBD visible?`,
+      gold:`1. CARGO STATUS: AIS reports vessel type and DWT, not confirmed cargo. A tanker may be in ballast (empty). Loaded vs empty cannot be determined from AIS. 2. INTENT OF DARK EVENTS: ${dark.length>0?`The ${dark.length} currently dark vessel(s) could`:'Dark events could'} reflect technical fault, military OPSEC order, or piracy avoidance — AIS gap ≠ sanction violation. 3. DOWNSTREAM PRICE IMPACT: flow volume ≠ price. Price depends on inventory levels, Saudi/UAE spare capacity response, SPR releases, and demand elasticity — none visible in AIS. 4. METEOROLOGICAL CAUSE: Gulf of Oman monsoon (May–Sep) reduces transit speeds naturally. Avg speed ${avgSpd} kn alone cannot confirm threat without seasonality check. 5. DESTINATION ACCURACY: AIS destination is self-reported and frequently falsified on sanctioned routes. Declared destination is not confirmable from AIS alone.`
+    }
+  ];
+}
+
+function generateAndRender(){
+  cachedEvals=generateEvals();
+  rubricScores=[null,null,null,null,null];
+  const ts=new Date(),pad=n=>String(n).padStart(2,'0');
+  document.getElementById('evalsTimestamp').textContent=
+    `${pad(ts.getUTCHours())}:${pad(ts.getUTCMinutes())} UTC · ${vessels.length} vessels · risk ${document.getElementById('riskScore').textContent}/100`;
+  document.getElementById('evalCards').innerHTML=cachedEvals.map((e,i)=>`
+    <div class="eval-card">
+      <div class="eval-card-head">
+        <span class="eval-cat" style="background:${e.color}22;color:${e.color};border:1px solid ${e.color}44">${e.cat}</span>
+        <span class="eval-diff">${e.difficulty}</span>
+      </div>
+      <div class="eval-q-label">PROMPT</div>
+      <div class="eval-q">${e.q}</div>
+      <div class="eval-gold-label">GOLD ANSWER</div>
+      <div class="eval-gold">${e.gold}</div>
+      <button class="eval-copy-btn" id="copy-${i}" onclick="copyEval(${i})">⊞ COPY TASK JSON</button>
+    </div>`).join('');
+}
+
+function copyEval(idx){
+  const e=cachedEvals[idx];if(!e)return;
+  const payload=JSON.stringify({
+    category:e.cat,difficulty:e.difficulty,prompt:e.q,gold_answer:e.gold,
+    timestamp:new Date().toISOString(),
+    data_snapshot:{
+      vessels:vessels.length,
+      tankers:vessels.filter(v=>v.type==='tanker').length,
+      dark:vessels.filter(v=>v.isDark).length,
+      avg_speed_kn:+(vessels.reduce((s,v)=>s+v.speed,0)/vessels.length).toFixed(1),
+      oil_outbound_mbd:document.getElementById('oilOut').textContent,
+      risk_score:document.getElementById('riskScore').textContent
+    }
+  },null,2);
+  navigator.clipboard.writeText(payload).then(()=>{
+    const btn=document.getElementById(`copy-${idx}`);
+    const orig=btn.textContent;btn.textContent='✓ COPIED';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent=orig;btn.classList.remove('copied');},1800);
+  });
+}
+
+// ── Scenarios ────────────────────────────────────────────────
+const SCENARIOS=[
+  {id:'normal',  name:'NORMAL',   sub:'Baseline conditions',       risk:'LOW RISK',   riskColor:'#007744',
+   brent:'—',        bCls:'val-ok',  tanker:'BASELINE', tCls:'val-ok',
+   ins:'STANDARD',   iCls:'val-ok',  infl:'+0 bps',     fCls:'val-ok',  supply:'~17 MBD',supplyCls:'val-ok',
+   caveat:'Baseline Hormuz operations. ~17 MBD crude and ~20% world LNG transit normally. No material market risk premium warranted from AIS data alone.'},
+  {id:'moderate',name:'MODERATE', sub:'~30% traffic reduction',    risk:'ELEVATED',   riskColor:'#c07800',
+   brent:'+$8–15/bbl',bCls:'val-warn',tanker:'+30–60%',tCls:'val-warn',
+   ins:'+20–40%',    iCls:'val-warn',infl:'+20–50 bps',fCls:'val-warn',supply:'~11–13 MBD',supplyCls:'val-warn',
+   caveat:'Consistent with congestion, episodic naval incidents, or elevated threat perception. Brent spikes on news then stabilises if Saudi spare capacity (~2–3 M bbl/day) is credible. Monitor: OPEC+ emergency meeting convened?'},
+  {id:'severe',  name:'SEVERE',   sub:'~60% traffic reduction',    risk:'CRITICAL',   riskColor:'#cc3300',
+   brent:'+$25–45/bbl',bCls:'val-crit',tanker:'+100–200%',tCls:'val-crit',
+   ins:'+80–150%/advisory',iCls:'val-crit',infl:'+80–160 bps',fCls:'val-crit',supply:'~6–8 MBD',supplyCls:'val-crit',
+   caveat:'Consistent with military escalation, mine-laying, or vessel seizure. Historical analogue: 1987 tanker war. P&I clubs likely suspend new cover. Cape of Good Hope rerouting adds ~14 days and ~$2–4M fuel per voyage. TIPS/breakevens widen; EM central banks face FX intervention pressure.'},
+  {id:'closure', name:'CLOSURE',  sub:'Near-total blockade',       risk:'SYSTEMIC',   riskColor:'#aa0000',
+   brent:'+$60–120/bbl',bCls:'val-crit',tanker:'SUSPENDED',tCls:'val-crit',
+   ins:'SUSPENDED',  iCls:'val-crit',infl:'+200–400 bps',fCls:'val-crit',supply:'<2 MBD',supplyCls:'val-crit',
+   caveat:'No modern precedent for full closure. IEA ~85-day global oil stock buffer. SPR coordinated release likely within 72 hrs. Inflation pass-through severe for oil-importing EMs. Global recession probability rises sharply beyond 30-day closure. Tests LLM ability to reason under genuine uncertainty without hallucinating price outcomes.'}
+];
+
+function renderScenarios(){
+  document.getElementById('scenarioBtns').innerHTML=SCENARIOS.map(s=>`
+    <button class="scenario-btn ${activeScenario===s.id?'active':''}" onclick="applyScenario('${s.id}')">
+      <div class="sc-name">${s.name}</div>
+      <div class="sc-factor">${s.sub}</div>
+      <div class="sc-risk" style="color:${s.riskColor}">${s.risk}</div>
+    </button>`).join('');
+  renderImpactTable();
+}
+
+function applyScenario(id){
+  activeScenario=id;
+  const s=SCENARIOS.find(x=>x.id===id);if(!s)return;
+  if(id==='normal'){
+    scenarioMaxSpd=null;
+    vessels.filter(v=>v.type==='tanker'&&v.status!=='ANCHORED').forEach(v=>{
+      const[mn,mx]=SR.tanker;if(v.speed<mn+2)v.speed=mn+Math.random()*(mx-mn)*0.6;
+    });
+    document.getElementById('scenarioBadge').classList.remove('on');
+    pushAlert('info','SCENARIO','Scenario reset to normal conditions. Tanker speed restored.');
+  } else {
+    const factor={moderate:0.55,severe:0.30,closure:0.08}[id]||0.55;
+    scenarioMaxSpd=SR.tanker[1]*factor;
+    vessels.filter(v=>v.type==='tanker'&&v.status!=='ANCHORED').forEach(v=>{
+      v.speed=Math.max(SR.tanker[0],v.speed*factor);
+    });
+    const badge=document.getElementById('scenarioBadge');
+    badge.textContent=`▷ SCENARIO: ${s.name}`;badge.classList.add('on');
+    pushAlert('warning','SCENARIO',`Scenario applied: ${s.name}. Tanker speeds adjusted. Dashboard reflects projected disruption state.`);
+  }
+  renderScenarios();
+}
+
+function renderImpactTable(){
+  const s=SCENARIOS.find(x=>x.id===activeScenario);if(!s)return;
+  document.getElementById('impactTable').innerHTML=`
+    <tr><th>INSTRUMENT</th><th>EXPECTED MOVE</th><th>REACTION</th><th>MECHANISM</th></tr>
+    <tr><td><strong>Brent crude</strong></td><td class="${s.bCls}">${s.brent}</td><td>Minutes–hours</td><td>Forward supply shock; futures price risk premium immediately</td></tr>
+    <tr><td><strong>VLCC tanker spot rates</strong></td><td class="${s.tCls}">${s.tanker}</td><td>Hours–1 day</td><td>Operators reprice fixtures; charterers divert; freight risk embedded</td></tr>
+    <tr><td><strong>Marine/war-risk insurance</strong></td><td class="${s.iCls}">${s.ins}</td><td>1–3 days</td><td>Lloyd's JWC advisory; P&I premiums renegotiated at next renewal</td></tr>
+    <tr><td><strong>5yr inflation breakevens</strong></td><td class="${s.fCls}">${s.infl}</td><td>Days–weeks</td><td>Energy feeds CPI expectations with lag; TIPS-nominal spread widens</td></tr>
+    <tr><td><strong>Outbound supply</strong></td><td class="${s.supplyCls}">${s.supply}</td><td>Immediate</td><td>Directly observable: AIS tanker count × avg DWT × speed factor</td></tr>`;
+  document.getElementById('impactCaveat').innerHTML=`<strong>⚠ UNCERTAINTY:</strong> ${s.caveat}`;
+}
+
+// ── Rubric ───────────────────────────────────────────────────
+const RUBRIC_DIMS=[
+  {name:'Correctness',         desc:'Factual accuracy of numbers, dates, and causal claims'},
+  {name:'Evidence use',        desc:'Does the response cite specific data points from the AIS feed?'},
+  {name:'Uncertainty handling',desc:'Does it flag what cannot be concluded from AIS data alone?'},
+  {name:'Finance reasoning',   desc:'Are market transmission mechanisms sequenced correctly?'},
+  {name:'Safety/compliance',   desc:'No fabrication, no overconfident hallucination, no false precision?'}
+];
+
+function initRubric(){
+  if(cachedEvals.length===0)cachedEvals=generateEvals();
+  rubricQIdx=Math.floor(Math.random()*cachedEvals.length);
+  rubricScores=[null,null,null,null,null];
+  renderRubricQ();renderRubricDims();updateRubricTotal();
+}
+
+function pickNewRubricQ(){
+  rubricQIdx=(rubricQIdx+1)%Math.max(cachedEvals.length,1);
+  rubricScores=[null,null,null,null,null];
+  renderRubricQ();renderRubricDims();updateRubricTotal();
+}
+
+function renderRubricQ(){
+  if(!cachedEvals.length)return;
+  const e=cachedEvals[rubricQIdx];
+  document.getElementById('rubricQCat').textContent=e.cat+' · '+e.difficulty;
+  document.getElementById('rubricQText').textContent=e.q;
+}
+
+function renderRubricDims(){
+  document.getElementById('rubricDims').innerHTML=RUBRIC_DIMS.map((d,i)=>`
+    <div class="rubric-dim">
+      <div class="rubric-dim-name">${d.name}</div>
+      <div class="rubric-dim-desc">${d.desc}</div>
+      <div class="rub-score-btns">
+        ${[0,1,2].map(v=>`<button class="rub-score-btn${rubricScores[i]===v?' active':''}" onclick="setRubricScore(${i},${v})">${v}</button>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function setRubricScore(dim,val){
+  rubricScores[dim]=rubricScores[dim]===val?null:val;
+  renderRubricDims();updateRubricTotal();
+}
+
+function updateRubricTotal(){
+  const filled=rubricScores.filter(s=>s!==null);
+  const total=filled.reduce((s,v)=>s+v,0);
+  document.getElementById('rubricScore').textContent=total;
+  const pct=filled.length>0?total/(filled.length*2):0;
+  const verdict=
+    filled.length===0?'Select scores above to begin grading.':
+    filled.length<5 ?`${filled.length}/5 dimensions scored — total so far: ${total}/${filled.length*2}.`:
+    pct>=0.85?`PASS (${total}/10) — Strong response. Correct reasoning, good evidence use, appropriate uncertainty.`:
+    pct>=0.60?`MARGINAL (${total}/10) — Acceptable but gaps in evidence or uncertainty handling.`:
+    pct>=0.40?`FAIL (${total}/10) — Significant reasoning errors or poor evidence use.`:
+    `REJECT (${total}/10) — Fundamental errors, likely hallucination or unsafe claims detected.`;
+  document.getElementById('rubricVerdict').textContent=verdict;
+}
+
+function exportRubric(){
+  if(!cachedEvals.length)return;
+  const e=cachedEvals[rubricQIdx];
+  const scores=Object.fromEntries(RUBRIC_DIMS.map((d,i)=>[d.name.toLowerCase().replace(/[\s/]+/g,'_'),rubricScores[i]]));
+  const payload=JSON.stringify({
+    eval_task:{category:e.cat,difficulty:e.difficulty,prompt:e.q},
+    scores,total:rubricScores.filter(s=>s!==null).reduce((s,v)=>s+v,0),max:10,
+    verdict:document.getElementById('rubricVerdict').textContent,
+    timestamp:new Date().toISOString()
+  },null,2);
+  navigator.clipboard.writeText(payload).then(()=>{
+    const btn=document.querySelector('.rubric-export-btn');
+    const orig=btn.textContent;btn.textContent='✓ COPIED';
+    setTimeout(()=>btn.textContent=orig,1800);
+  });
 }
 
 // MAIN LOOP
