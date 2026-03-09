@@ -346,8 +346,8 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
     <div class="help-grid one">
       <div class="hcard accent-border">
         <h3>WHAT IS THIS TRACKER?</h3>
-        <p>This tool monitors maritime vessel traffic through the <strong>Strait of Hormuz</strong> - one of the world's most strategically critical waterways.</p>
-        <p>It tracks visible vessel movements, dark transits, traffic flow, and disruptions across the <strong>Persian Gulf</strong>, the <strong>Strait of Hormuz</strong>, and the <strong>Gulf of Oman</strong>.</p>
+        <p>This tracker monitors maritime traffic through the Strait of Hormuz, one of the world's most critical energy chokepoints. Roughly one-fifth of global oil trade transits this corridor.</p>
+        <p>It covers three connected basins: the Persian Gulf, the Strait narrows, and the Gulf of Oman. It tracks vessel flow, speed changes, anchorage buildup, AIS-off events, and dark-transit reappearance patterns.</p>
       </div>
     </div>
 
@@ -355,10 +355,26 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
     <div class="help-grid one">
       <div class="hcard accent-border">
         <h3>STATUS LABELS</h3>
-        <p><strong>SIMULATION</strong>: Route-based simulated traffic is active.</p>
+        <p><strong>SIMULATION</strong>: Route-based traffic simulation is active.</p>
         <p><strong>CONNECTING</strong>: Live AIS websocket handshake in progress.</p>
-        <p><strong>LIVE</strong>: Real AIS messages are flowing and updating vessels.</p>
-        <p><strong>FALLBACK</strong>: Live feed failed or became stale; simulation remains active.</p>
+        <p><strong>LIVE</strong>: Real AIS messages are flowing and updating positions.</p>
+        <p><strong>FALLBACK</strong>: Live feed unavailable or stale; simulation remains active automatically.</p>
+      </div>
+    </div>
+
+    <div class="help-section-title">THE THREE ZONES</div>
+    <div class="help-grid">
+      <div class="hcard green-border">
+        <h3 class="green">PERSIAN GULF</h3>
+        <p>Upstream loading basin. Tankers here are often loading or preparing outbound transit toward the Strait.</p>
+      </div>
+      <div class="hcard accent-border">
+        <h3>STRAIT NARROWS</h3>
+        <p>The high-sensitivity chokepoint. Traffic compression, speed drops, and AIS interruptions are most important here.</p>
+      </div>
+      <div class="hcard amber-border">
+        <h3 class="amber">GULF OF OMAN</h3>
+        <p>Downstream basin. Vessels here typically completed Strait transit and continue toward the Indian Ocean or return inbound.</p>
       </div>
     </div>
 
@@ -366,43 +382,99 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
     <div class="help-grid">
       <div class="hcard">
         <h3>VESSEL COLOURS & TYPES</h3>
-        <div class="dot-row"><div class="dot" style="background:var(--tanker)"></div><p><strong>Cyan</strong> - Tanker / LNG Carrier</p></div>
-        <div class="dot-row"><div class="dot" style="background:var(--cargo)"></div><p><strong>Green</strong> - Cargo / Container</p></div>
-        <div class="dot-row"><div class="dot" style="background:var(--naval)"></div><p><strong>Red</strong> - Naval / Military</p></div>
-        <div class="dot-row"><div class="dot" style="background:var(--unknown)"></div><p><strong>Amber</strong> - Unknown</p></div>
-        <div class="dot-row"><div class="dot" style="background:var(--dark);animation:blink .8s infinite"></div><p><strong>Orange</strong> - Currently dark (AIS off)</p></div>
+        <div class="dot-row"><div class="dot" style="background:var(--tanker)"></div><p><strong>Cyan</strong> - Tanker / LNG carrier (strategic energy cargo).</p></div>
+        <div class="dot-row"><div class="dot" style="background:var(--cargo)"></div><p><strong>Green</strong> - Cargo / container vessels.</p></div>
+        <div class="dot-row"><div class="dot" style="background:var(--naval)"></div><p><strong>Red</strong> - Naval / military.</p></div>
+        <div class="dot-row"><div class="dot" style="background:var(--unknown)"></div><p><strong>Amber</strong> - Unknown type from available AIS fields.</p></div>
+        <div class="dot-row"><div class="dot" style="background:var(--dark);animation:blink .8s infinite"></div><p><strong>Orange</strong> - Dark vessel (AIS disabled or unavailable).</p></div>
       </div>
       <div class="hcard">
-        <h3>DARK TRANSITS</h3>
-        <p>A vessel may appear in one basin, go dark near the strait, then reappear in the other basin. Reappeared vessels are highlighted and their route is shown in the detail panel.</p>
+        <h3>INTERACTING WITH VESSELS</h3>
+        <p>Hover a vessel for name/type/speed/zone/destination. Click map icon or list row to pin full detail in the right panel.</p>
+        <p>Underway vessels are directional arrows; anchored vessels are circular markers.</p>
       </div>
     </div>
+
+    <div class="help-section-title">DARK VESSELS</div>
+    <div class="help-grid one">
+      <div class="hcard dark-border">
+        <h3 class="dark">WHAT A DARK EVENT MEANS</h3>
+        <p>A dark vessel is one that stops broadcasting track updates. In this tracker, the vessel disappears from normal map rendering, DARK AIS count rises, and a dark alert is added to the feed.</p>
+        <p>Dark behavior can be technical or operational. In a chokepoint context, repeated dark events during transit are treated as high-priority anomalies.</p>
+      </div>
+    </div>
+
     <div class="help-section-title">DARK-TRANSIT TRACKING UPGRADE</div>
     <div class="help-grid one">
       <div class="hcard dark-border">
-        <h3 class="dark">CROSS-BASIN HIDDEN TRANSIT MODEL</h3>
-        <p>The tracker now models dark transit as a directional sequence: vessels are identified near basin approaches, enter the Strait with AIS loss, and continue moving on a hidden transit route.</p>
-        <p>Reappearance occurs on the opposite basin side with automatic highlight and alert context so operators can link last-seen location to re-emergence.</p>
+        <h3 class="dark">THREE-PHASE TRACKING MODEL</h3>
+        <p><strong>Phase 1 - Visible</strong>: vessel is tracked with live/sim position, heading, and speed.</p>
+        <p><strong>Phase 2 - Blind</strong>: AIS goes dark near approach lanes; vessel movement continues on hidden transit routing.</p>
+        <p><strong>Phase 3 - Reacquired</strong>: vessel reappears in the opposite basin and is highlighted as a completed dark transit.</p>
       </div>
     </div>
+
     <div class="help-grid">
       <div class="hcard dark-border">
         <h3 class="dark">PERSIAN GULF -> GULF OF OMAN</h3>
-        <p>1) Outbound vessels are tagged near the Gulf-side approach.</p>
-        <p>2) AIS loss is tracked through hidden Strait waypoints while motion continues.</p>
-        <p>3) Reappearance is confirmed in Gulf of Oman waters and highlighted.</p>
+        <p>Outbound vessel goes dark near Gulf-side approaches, remains blind through Strait corridor, then reappears in Oman-side waters with transit labeling.</p>
       </div>
       <div class="hcard dark-border">
         <h3 class="dark">GULF OF OMAN -> PERSIAN GULF</h3>
-        <p>1) Inbound vessels are tagged near the Oman-side approach.</p>
-        <p>2) The transit remains dark through the Strait corridor using internal route tracking.</p>
-        <p>3) Reappearance is confirmed in Persian Gulf waters with route and timing context.</p>
+        <p>Inbound vessel goes dark near Oman-side approaches, remains blind through narrows, then reappears in Gulf waters with route and gap context.</p>
       </div>
     </div>
-  </div>
-</div>
 
-<script>
+    <div class="help-grid one">
+      <div class="hcard accent-border">
+        <h3>VISUAL CUES FOR DARK TRANSITS</h3>
+        <p>During dark phase: a <strong>last-seen orange marker</strong> remains on map.</p>
+        <p>On reappearance: vessel gets <strong>cyan highlight + pulse</strong>, list row gets <strong>REAPPEARED</strong> badge, and a dashed bridge line links last-seen to reacquired position.</p>
+        <p>Detail panel includes <strong>DARK ROUTE</strong>, <strong>LAST AIS POS</strong>, <strong>REAPPEARED</strong>, and estimated <strong>AIS GAP</strong>.</p>
+      </div>
+    </div>
+
+    <div class="help-section-title">TOP BAR METRICS</div>
+    <div class="help-grid two">
+      <div class="hcard">
+        <h3>VESSELS / TANKERS / AVG KN / DARK AIS</h3>
+        <p><strong>VESSELS</strong>: tracked vessels in theater.</p>
+        <p><strong>TANKERS</strong>: tanker/LNG subset.</p>
+        <p><strong>AVG KN</strong>: average speed in knots.</p>
+        <p><strong>DARK AIS</strong>: active dark vessels.</p>
+      </div>
+      <div class="hcard">
+        <h3>STATUS BADGE</h3>
+        <p><strong>NOMINAL</strong>: traffic profile near baseline.</p>
+        <p><strong>ELEVATED</strong>: anomaly present (speed/flow/anchorage/dark mix).</p>
+        <p><strong>ALERT</strong>: severe disruption conditions.</p>
+        <p><strong>DARK VESSEL</strong>: one or more active dark events.</p>
+      </div>
+    </div>
+
+    <div class="help-section-title">LEFT PANEL - FLOW</div>
+    <div class="help-grid one">
+      <div class="hcard">
+        <p><strong>Inbound -> Gulf</strong>, <strong>Outbound -> Sea</strong>, <strong>Slow/Anchored</strong>, and <strong>Dark/No AIS</strong> bars show real-time split of operating conditions.</p>
+        <p>Sparkline shows vessel count trend versus baseline, useful for rapid disruption/recovery assessment.</p>
+      </div>
+    </div>
+
+    <div class="help-section-title">RIGHT PANEL - ANALYTICS</div>
+    <div class="help-grid one">
+      <div class="hcard">
+        <p><strong>Chokepoint Risk Index</strong> combines dark-rate, slowdown, anchored share, and flow-loss signals.</p>
+        <p><strong>Oil & LNG Flow</strong> estimates throughput from active outbound energy vessels and speed factor.</p>
+        <p><strong>Stranded & Waiting</strong> highlights anchorage and low-speed delay pressure.</p>
+        <p><strong>Alert Feed</strong> streams event-level context including dark-transit complete events.</p>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <p><strong>Interpretation note:</strong> Simulation mode is route-constrained and behavior-based, not a full hydrographic/nav-aid engine. Live mode reflects actual AIS messages when available.</p>
+    </div>
+  </div>
+</div><script>
 const WP_IN = [
   [22.50, 61.50],[23.00, 60.80],[23.50, 60.10],[24.00, 59.40],[24.60, 58.80],[25.10, 58.20],
   [25.60, 57.70],[26.00, 57.30],[26.20, 57.00],[26.35, 56.70],[26.46, 56.40],[26.50, 56.15],
@@ -465,11 +537,11 @@ const ANCHORS = {
   muscat:{lat:23.70,lng:58.72}, sohar:{lat:24.42,lng:56.82}, salalah:{lat:16.88,lng:54.08}
 };
 const ANCHOR_HOTSPOTS = [
-  {zone:'gulf', port:'kharg', weight:7}, {zone:'gulf', port:'basra', weight:4}, {zone:'gulf', port:'kuwait', weight:4},
-  {zone:'gulf', port:'rasLaffan', weight:5}, {zone:'gulf', port:'doha', weight:3}, {zone:'gulf', port:'jubail', weight:4},
-  {zone:'gulf', port:'abuDhabi', weight:4}, {zone:'gulf', port:'dubai', weight:3},
-  {zone:'oman', port:'bandarAbbas', weight:5}, {zone:'oman', port:'khorFakkan', weight:4}, {zone:'oman', port:'fujairah', weight:8},
-  {zone:'oman', port:'sohar', weight:4}, {zone:'oman', port:'muscat', weight:3}
+  {zone:'gulf', port:'kharg', weight:11}, {zone:'gulf', port:'basra', weight:7}, {zone:'gulf', port:'kuwait', weight:6},
+  {zone:'gulf', port:'rasLaffan', weight:9}, {zone:'gulf', port:'doha', weight:6}, {zone:'gulf', port:'jubail', weight:6},
+  {zone:'gulf', port:'abuDhabi', weight:6}, {zone:'gulf', port:'dubai', weight:5},
+  {zone:'oman', port:'bandarAbbas', weight:10}, {zone:'oman', port:'khorFakkan', weight:8}, {zone:'oman', port:'fujairah', weight:15},
+  {zone:'oman', port:'sohar', weight:7}, {zone:'oman', port:'muscat', weight:6}
 ];
 
 const VDATA = [
@@ -627,20 +699,21 @@ const VDATA = [
 ];
 
 const BASELINE = 168;
-const DENSITY_TARGET = 168;
-const MIN_VISIBLE_TARGET = 145;
-const MAX_SIM_TRACKED = 220;
+const DENSITY_TARGET = 176;
+const MIN_VISIBLE_TARGET = 155;
+const MAX_SIM_TRACKED = 240;
 const SIM_TICK_SECONDS = 0.18;
 const SIM_TIME_ACCEL = 24;
 const TC = {tanker:"#00d4ff",cargo:"#00ff99",warship:"#ff2b2b",unknown:"#ffaa00",dark:"#ff6600"};
 const SR = {tanker:[8,13],cargo:[9,14],warship:[14,20],unknown:[5,10],dark:[4,7]};
 
-let vessels=[], lm={}, trails={}, selId=null;`r`nlet darkLastSeenLm={}, darkBridgeLm={};
+let vessels=[], lm={}, trails={}, selId=null;
+let darkLastSeenLm={}, darkBridgeLm={};
 let tickN=0, sparkData=Array(60).fill(BASELINE).map(v=>v+(Math.random()-.5)*4);
 let disruptTimer=0, inDisrupt=false, alertTick=0;
 let aisWS=null;
 let aisRetry=0, aisRetryTimer=null, aisLastMsgAt=0;
-let aisForceSim=false, aisFallbackAnnounced=false;
+let aisFallbackAnnounced=false;
 let map;
 
 function lerpWP(wps,t){
@@ -692,18 +765,20 @@ function placeAtAnchorage(v,zone){
   const hot=pickAnchorageByZone(zone);
   const base=ANCHORS[hot.port]||PORTS[hot.port]||ANCHORS.dubai;
   const ang=rnd(0,Math.PI*2);
-  const rad=rnd(0.003,0.038);
+  const spreadLat=hot.zone==='gulf'?0.020:0.016;
+  const spreadLng=hot.zone==='gulf'?0.014:0.011;
+  const rad=Math.sqrt(Math.random());
   v.port=hot.port;
   v.zone=hot.zone;
   v.status='ANCHORED';
-  v.speed=rnd(0,0.35);
-  v.lat=base.lat + Math.cos(ang)*rad;
-  v.lng=base.lng + Math.sin(ang)*rad;
+  v.speed=rnd(0,0.30);
+  v.lat=base.lat + Math.cos(ang)*spreadLat*rad;
+  v.lng=base.lng + Math.sin(ang)*spreadLng*rad;
   [v.lat,v.lng]=constrainToTheater(v.lat,v.lng);
   v.trail=[];
 }
 function seedAnchorageMix(){
-  const desired=Math.round(vessels.length*0.22);
+  const desired=Math.round(vessels.length*0.30);
   let anchored=vessels.filter(v=>!v.isReal && v.status==='ANCHORED').length;
   let guard=0;
   while(anchored<desired && guard<300){
@@ -763,7 +838,7 @@ function constrainToTheater(lat,lng){
 }
 function pickRouteForVessel(d){
   if(d.zone==='strait'){
-    return d.isIn ? (Math.random()>0.55?WP_IN:WP_IN_ALT) : (Math.random()>0.55?WP_OUT:WP_OUT_ALT);
+    return d.isIn ? (Math.random()>0.82?WP_IN_ALT:WP_IN) : (Math.random()>0.82?WP_OUT_ALT:WP_OUT);
   }
   if(d.zone==='gulf'){
     const pool=[WP_GULF_N,WP_GULF_S,WP_GULF_MID,WP_GULF_DEEP];
@@ -801,9 +876,9 @@ function spawnVessel(d,i){
     prog = 0;
     heading = rnd(0,360);
   } else {
-    if(d.zone==='strait') prog = 0.2 + Math.random()*0.6;
-    else if(d.zone==='gulf') prog = 0.15 + Math.random()*0.75;
-    else prog = 0.15 + Math.random()*0.75;
+    if(d.zone==='strait') prog = 0.32 + Math.random()*0.36;
+    else if(d.zone==='gulf') prog = Math.random()<0.72 ? rnd(0.04,0.26) : rnd(0.74,0.95);
+    else prog = Math.random()<0.72 ? rnd(0.05,0.28) : rnd(0.72,0.95);
     const pos = lerpWP(wps,prog);
     lat = pos[0] + rnd(-0.008,0.008);
     lng = pos[1] + rnd(-0.008,0.008);
@@ -824,9 +899,9 @@ function spawnVessel(d,i){
     darkDuration:0,
     isReal:false,
     zone:detectZone(lat,lng),
-    wobbleAmp:d.anchored?0:rnd(0.0018,0.0095),
+    wobbleAmp:d.anchored?0:rnd(0.0006,0.0042),
     wobblePhase:rnd(0,Math.PI*2),
-    lateralBias:rnd(-0.006,0.006),
+    lateralBias:rnd(-0.003,0.003),
     darkStartZone:null,
     darkEndZone:null,
     darkTransitLabel:null,
@@ -883,6 +958,7 @@ function rebalanceSimDensity(){
       vessels = vessels.filter(v=>v.id!==victim.id);
       if(lm[victim.id]){map.removeLayer(lm[victim.id]);delete lm[victim.id];}
       if(trails[victim.id]){map.removeLayer(trails[victim.id]);delete trails[victim.id];}
+      clearDarkFx(victim.id);
     }
   }
 }
@@ -892,7 +968,13 @@ function moveVessels(){
     if(v.isReal || v.isDark) return;
 
     if(v.status==='ANCHORED'){
-      if(Math.random()<0.0025){
+      const a=ANCHORS[v.port]||PORTS[v.port];
+      if(a){
+        v.lat += (a.lat-v.lat)*0.08 + rnd(-0.0009,0.0009);
+        v.lng += (a.lng-v.lng)*0.08 + rnd(-0.0009,0.0009);
+        [v.lat,v.lng]=constrainToTheater(v.lat,v.lng);
+      }
+      if(Math.random()<0.0014){
         v.status='UNDERWAY';
         v.isIn = v.zone==='oman';
         v.wps = pickRouteForVessel(v);
@@ -904,7 +986,7 @@ function moveVessels(){
       return;
     }
 
-    if(tickN%45===0 && Math.random()<0.012 && v.zone!=='strait' && v.type!=='warship'){
+    if(tickN%45===0 && Math.random()<0.006 && v.zone!=='strait' && v.type!=='warship'){
       placeAtAnchorage(v,v.zone);
       return;
     }
@@ -930,6 +1012,12 @@ function moveVessels(){
     [v.lat,v.lng] = clampToRoute(v.lat,v.lng,v.wps,0.22);
     [v.lat,v.lng] = constrainToTheater(v.lat,v.lng);
     v.zone = detectZone(v.lat,v.lng);
+
+    if(v.zone==='strait'){
+      const spine=v.isIn?WP_IN:WP_OUT;
+      [v.lat,v.lng]=clampToRoute(v.lat,v.lng,spine,0.08);
+      v.lateralBias*=0.985;
+    }
 
     v.speed += rnd(-0.08,0.08);
     const [mn,mx] = SR[v.type] || [8,14];
@@ -971,34 +1059,49 @@ function renderVessels(){
     if(v.isDark){
       if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}
       if(trails[v.id]){map.removeLayer(trails[v.id]);delete trails[v.id];}
+
+      if(v.darkLastSeen){
+        const pt=[v.darkLastSeen.lat,v.darkLastSeen.lng];
+        if(darkLastSeenLm[v.id]) darkLastSeenLm[v.id].setLatLng(pt);
+        else {
+          darkLastSeenLm[v.id]=L.circleMarker(pt,{radius:7,color:'#ff6600',weight:2,fillColor:'#ff6600',fillOpacity:0.16,opacity:0.95}).addTo(map);
+          darkLastSeenLm[v.id].bindTooltip(`<strong style="color:#ff6600">${v.name}</strong><br>DARK AIS LAST SEEN`,{sticky:true,opacity:1});
+        }
+      }
+      if(darkBridgeLm[v.id]){map.removeLayer(darkBridgeLm[v.id]);delete darkBridgeLm[v.id];}
       return;
     }
+
+    if(darkLastSeenLm[v.id]){map.removeLayer(darkLastSeenLm[v.id]);delete darkLastSeenLm[v.id];}
 
     const col = v.wasDarkRecently ? '#ffffff' : (TC[v.type] || '#fff');
     const glowCol = v.wasDarkRecently ? '#00d4ff' : col;
     const isAnchored = v.status === 'ANCHORED';
     const h = v.heading !== undefined ? v.heading : 90;
-    const iconSize = isAnchored ? [7,7] : [11,15];
+    const iconSize = isAnchored ? [7,7] : (v.wasDarkRecently ? [16,20] : [11,15]);
 
     const icon = isAnchored
       ? L.divIcon({
           html:`<div style="width:7px;height:7px;border-radius:50%;background:${col};box-shadow:0 0 6px ${glowCol};opacity:.9;cursor:pointer;border:1px solid rgba(255,255,255,.2)"></div>`,
           className:'', iconSize:iconSize, iconAnchor:[3,3]
         })
-      : L.divIcon({
-          html:`<svg width="11" height="15" viewBox="0 0 16 20" style="transform:rotate(${h}deg);cursor:pointer;overflow:visible;filter:drop-shadow(0 0 4px ${glowCol})"><polygon points="8,0 16,18 8,13 0,18" fill="${col}" fill-opacity=".92" stroke="rgba(255,255,255,.35)" stroke-width="0.35"/></svg>`,
-          className:'', iconSize:iconSize, iconAnchor:[6,8]
-        });
+      : v.wasDarkRecently
+        ? L.divIcon({
+            html:`<svg width="16" height="20" viewBox="0 0 20 24" style="transform:rotate(${h}deg);cursor:pointer;overflow:visible;filter:drop-shadow(0 0 8px #00d4ff)"><circle cx="10" cy="13" r="8" fill="none" stroke="#00d4ff" stroke-width="1.2" opacity="0.7" style="animation:reapPulse 1.2s linear infinite"/><polygon points="10,2 18,20 10,15 2,20" fill="#ffffff" fill-opacity=".95" stroke="#00d4ff" stroke-width="0.9"/></svg>`,
+            className:'', iconSize:iconSize, iconAnchor:[8,11]
+          })
+        : L.divIcon({
+            html:`<svg width="11" height="15" viewBox="0 0 16 20" style="transform:rotate(${h}deg);cursor:pointer;overflow:visible;filter:drop-shadow(0 0 4px ${glowCol})"><polygon points="8,0 16,18 8,13 0,18" fill="${col}" fill-opacity=".92" stroke="rgba(255,255,255,.35)" stroke-width="0.35"/></svg>`,
+            className:'', iconSize:iconSize, iconAnchor:[6,8]
+          });
 
     const moveLabel = v.status === 'ANCHORED'
       ? 'ANCHORED'
       : v.isIn ? 'INBOUND TO GULF' : 'OUTBOUND TO SEA';
 
-    const darkLine = v.isDark
-      ? `<br><span style="color:#ff6600">DARK TRANSIT: ${v.darkTransitLabel || 'IN PROGRESS'}</span>`
-      : v.wasDarkRecently
-        ? `<br><span style="color:#00d4ff">REAPPEARED: ${v.darkTransitLabel || 'COMPLETED'}</span>`
-        : '';
+    const darkLine = v.wasDarkRecently
+      ? `<br><span style="color:#00d4ff">REAPPEARED: ${v.darkTransitLabel || 'COMPLETED'}</span>`
+      : '';
 
     const tt=`<strong style="color:${col}">${v.name}</strong><br>${v.type.toUpperCase()}  ${v.flag}<br>${v.speed.toFixed(1)} kn  ${moveLabel}<br>DEST: ${v.dest}<br>ZONE: ${v.zone.toUpperCase()}${darkLine}`;
 
@@ -1012,6 +1115,16 @@ function renderVessels(){
       lm[v.id]=m;
     }
 
+    if(v.wasDarkRecently && v.darkLastSeen){
+      const age=Math.max(0,tickN-(v.darkReappearTick||tickN));
+      const fade=Math.max(0.2,1-(age/140));
+      const pts=[[v.darkLastSeen.lat,v.darkLastSeen.lng],[v.lat,v.lng]];
+      if(darkBridgeLm[v.id]) darkBridgeLm[v.id].setLatLngs(pts).setStyle({opacity:0.55*fade});
+      else darkBridgeLm[v.id]=L.polyline(pts,{color:'#00d4ff',weight:2,opacity:0.55*fade,dashArray:'5 5'}).addTo(map);
+    } else if(darkBridgeLm[v.id]){
+      map.removeLayer(darkBridgeLm[v.id]);delete darkBridgeLm[v.id];
+    }
+
     if(v.trail.length>2){
       if(trails[v.id]) trails[v.id].setLatLngs(v.trail);
       else {
@@ -1021,7 +1134,6 @@ function renderVessels(){
     }
   });
 }
-
 function selVessel(id){
   selId=id;
   const v=vessels.find(x=>x.id===id);
@@ -1043,13 +1155,16 @@ function selVessel(id){
   ];
   if(v.darkTransitLabel) detailRows.push(['DARK ROUTE', v.darkTransitLabel]);
   if(v.darkStartZone) detailRows.push(['LAST SEEN', v.darkStartZone.toUpperCase()]);
+  if(v.darkLastSeen) detailRows.push(['LAST AIS POS', `${v.darkLastSeen.lat.toFixed(2)}N ${v.darkLastSeen.lng.toFixed(2)}E`]);
   if(v.darkEndZone && !v.isDark) detailRows.push(['REAPPEARED', v.darkEndZone.toUpperCase()]);
+  if(v.wasDarkRecently && v.darkReappearTick && v.darkLastSeen?.tick){
+    detailRows.push(['AIS GAP', `~${Math.max(6,Math.round((v.darkReappearTick-v.darkLastSeen.tick)*0.6))} min`]);
+  }
 
   document.getElementById('vdG').innerHTML = detailRows.map(([k,val])=>`<div class="vd-c"><div class="k">${k}</div><div class="v">${val}</div></div>`).join('');
   map.panTo([v.lat,v.lng],{animate:true});
   document.querySelectorAll('.vr').forEach(el=>el.classList.toggle('sel',el.dataset.id===id));
 }
-
 function renderList(){
   const sorted=[...vessels].sort((a,b)=>{
     if(a.isDark&&!b.isDark)return -1;
@@ -1060,20 +1175,19 @@ function renderList(){
   });
   document.getElementById('vct').textContent=`(${vessels.length})`;
   document.getElementById('vlist').innerHTML=sorted.map(v=>`
-    <div class="vr ${selId===v.id?'sel':''} ${v.isDark?'dark-v':''}" data-id="${v.id}" onclick="selVessel('${v.id}')">
+    <div class="vr ${selId===v.id?'sel':''} ${v.isDark?'dark-v':''} ${v.wasDarkRecently?'reap-v':''}" data-id="${v.id}" onclick="selVessel('${v.id}')">
       <div class="vdot ${v.isDark?'dark':v.type}"></div>
       <div class="vi">
         <div class="vi-n">
           ${v.name}
           ${v.isDark ? '<span class="dbadge">DARK</span>' : ''}
-          ${v.wasDarkRecently ? '<span class="dbadge" style="background:#00d4ff;color:#001018;">REAPPEARED</span>' : ''}
+          ${v.wasDarkRecently ? '<span class="dbadge reap">REAPPEARED</span>' : ''}
         </div>
         <div class="vi-s">${v.flag}  ${v.status==='ANCHORED'?'ANCHORED':(v.isIn?'INBOUND':'OUTBOUND')}  ${v.zone.toUpperCase()}</div>
       </div>
       <div class="vi-spd">${v.speed.toFixed(1)}<span>KN</span></div>
     </div>`).join('');
 }
-
 const AVG_TANKER_BARRELS = 2000000;
 const AVG_LNG_BCF = 3.4;
 const NORMAL_OIL_MBD = 17;
@@ -1374,7 +1488,6 @@ function toggleHelp(){document.getElementById('helpOverlay').classList.toggle('o
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('helpOverlay').classList.remove('on');});
 
 function activateAisFallback(reason){
-  aisForceSim=true;
   if(aisWS){try{aisWS.close();}catch(e){} aisWS=null;}
   if(aisRetryTimer){clearTimeout(aisRetryTimer);aisRetryTimer=null;}
   setAS('FALLBACK','s-sim');
@@ -1382,20 +1495,19 @@ function activateAisFallback(reason){
     pushAlert('warning','AIS FALLBACK',`Live AIS unavailable (${reason}). Running free simulation mode with route-based traffic.`);
     aisFallbackAnnounced=true;
   }
+  aisRetryTimer=setTimeout(()=>{aisRetryTimer=null;connectAIS();},15000);
 }
 
 function connectAIS(){
-  if(aisForceSim) return;
-  const key='6aec39c94d240b94fcaf9c1060a5c64aa525de8b';
   if(aisRetryTimer){clearTimeout(aisRetryTimer);aisRetryTimer=null;}
   if(aisWS){try{aisWS.close();}catch(e){} aisWS=null;}
   const connStarted=Date.now();
   setAS('CONNECTING','s-sim');
-  aisWS=new WebSocket('wss://stream.aisstream.io/v0/stream');
+  aisWS=new WebSocket('wss://hormuz-ais-proxy.onrender.com');
   aisWS.onopen=()=>{
-    aisWS.send(JSON.stringify({APIKey:key,BoundingBoxes:[[[24.0,50.0],[28.5,60.0]]],FilterMessageTypes:['PositionReport','ShipStaticData']}));
     aisRetry=0;
     aisLastMsgAt=Date.now();
+    aisFallbackAnnounced=false;
     setAS('LIVE','s-live');
     pushAlert('info','AIS CONNECTED','Real-time feed active. Persian Gulf + Strait + Gulf of Oman coverage enabled.');
   };
