@@ -1,0 +1,306 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hormuz Eval Lab</title>
+<style>
+:root {
+  --bg:#07131f; --surf:#0c1b2b; --surf2:#14283c; --border:#20415e;
+  --accent:#00d4ff; --green:#00ff99; --amber:#ffaa00; --red:#ff2b2b;
+  --text:#d2e6fb; --muted:#6f93b3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(180deg,#081523 0%,#0b1b2c 100%);color:var(--text);font-family:"JetBrains Mono","Consolas",monospace;font-size:13px;line-height:1.45}
+.top{position:sticky;top:0;z-index:20;background:var(--surf);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;gap:12px;align-items:center}
+.brand{font-size:22px;letter-spacing:4px;color:var(--accent);font-family:"Bebas Neue","Arial Narrow",sans-serif;line-height:1}
+.sub{font-size:10px;color:var(--muted);letter-spacing:1px}
+.spacer{flex:1}
+.btn{background:rgba(0,212,255,.1);border:1px solid var(--accent);color:var(--accent);font-family:inherit;font-size:11px;padding:7px 10px;cursor:pointer;border-radius:2px}
+.btn:hover{background:rgba(0,212,255,.18)}
+.wrap{padding:12px 14px 24px}
+.card{background:var(--surf);border:1px solid var(--border);border-radius:4px;padding:10px}
+.h{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;gap:6px;align-items:center}
+.h:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.snap-grid{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:8px}
+.metric{background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:7px}
+.metric label{display:block;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
+.metric input{width:100%;background:#02101d;border:1px solid var(--border);color:var(--text);padding:6px;border-radius:2px;font-family:inherit}
+.help{margin-top:7px;color:var(--muted);font-size:11px}
+.toolbar{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;margin:10px 0}
+.tab-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 10px;border-radius:3px;cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px}
+.tab-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.08)}
+.panel{display:none}
+.panel.on{display:block}
+.snapshot-line{font-size:11px;color:var(--muted);margin-bottom:8px}
+.eval-card{background:var(--surf);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px}
+.ev-top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:8px}
+.ev-cat{color:var(--accent);font-size:11px;letter-spacing:2px}
+.ev-level{font-size:9px;color:var(--amber);border:1px solid rgba(255,170,0,.4);padding:2px 6px;border-radius:10px}
+.lbl{font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px}
+.block{background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:8px;font-size:12px;white-space:pre-wrap}
+.actions{margin-top:8px}
+.copy{background:transparent;border:1px solid var(--accent);color:var(--accent);font-size:10px;padding:5px 8px;border-radius:2px;cursor:pointer;font-family:inherit}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+textarea{width:100%;min-height:120px;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:3px;font-family:inherit;resize:vertical}
+.rubric{display:grid;grid-template-columns:1fr 80px 80px;gap:6px 8px;align-items:center}
+.rubric .hdr{font-size:10px;color:var(--muted)}
+.sel{background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:5px;border-radius:2px;font-family:inherit}
+.score-box{margin-top:8px;background:rgba(0,255,153,.08);border:1px solid var(--border);padding:8px;border-radius:3px}
+.scen-item,.evidence-item{background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:8px;margin-bottom:8px}
+@media (max-width: 1100px){.snap-grid{grid-template-columns:repeat(3,minmax(120px,1fr))}}
+@media (max-width: 760px){.snap-grid,.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <div class="brand">HORMUZ EVAL LAB</div>
+      <div class="sub">Macro-risk eval factory from live tracker snapshots</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="loadSnapshotBtn">LOAD LOCAL SNAPSHOT</button>
+    <button class="btn" id="genBtn">GENERATE EVALS</button>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="h">LIVE DATA SNAPSHOT</div>
+      <div class="snap-grid">
+        <div class="metric"><label>TOTAL VESSELS</label><input id="mTotal" type="number" value="168"></div>
+        <div class="metric"><label>TANKERS</label><input id="mTankers" type="number" value="82"></div>
+        <div class="metric"><label>DARK AIS</label><input id="mDark" type="number" value="1"></div>
+        <div class="metric"><label>AVG SPEED (KN)</label><input id="mSpeed" type="number" step="0.1" value="12.3"></div>
+        <div class="metric"><label>OIL OUT (MBD)</label><input id="mOil" type="number" step="0.1" value="13.8"></div>
+        <div class="metric"><label>RISK SCORE /100</label><input id="mRisk" type="number" value="14"></div>
+      </div>
+      <div class="help">Read values from tracker top bar + right panel, then click GENERATE. Defaults are representative baselines.</div>
+      <div class="toolbar">
+        <button class="btn" id="saveBtn">SAVE SNAPSHOT LOCAL</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn on" data-tab="evals">⊞ EVALS</button>
+      <button class="tab-btn" data-tab="scenarios">▷ SCENARIOS</button>
+      <button class="tab-btn" data-tab="rubric">◈ RUBRIC</button>
+      <button class="tab-btn" data-tab="evidence">⊡ EVIDENCE</button>
+    </div>
+
+    <div class="panel on" id="tab-evals">
+      <div class="snapshot-line" id="snapshotLine"></div>
+      <div id="evalList"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="h">MODEL A RESPONSE BOX</div>
+          <textarea id="modelA" placeholder="Paste Model A response..."></textarea>
+        </div>
+        <div class="card">
+          <div class="h">MODEL B RESPONSE BOX</div>
+          <textarea id="modelB" placeholder="Paste Model B response..."></textarea>
+        </div>
+      </div>
+      <div class="card" style="margin-top:10px;">
+        <div class="h">NOTES / STUMP LOG</div>
+        <textarea id="stumpLog" placeholder="Document misses, hallucinations, and disagreement cases."></textarea>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-scenarios">
+      <div class="card">
+        <div class="h">SCENARIO EXTENSION</div>
+        <div id="scenarioList"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-rubric">
+      <div class="card">
+        <div class="h">RUBRIC + MANUAL SCORE COMPARISON</div>
+        <div class="rubric">
+          <div class="hdr">Dimension</div><div class="hdr">Model A</div><div class="hdr">Model B</div>
+          <div>Correctness (0-2)</div><select class="sel score-a"><option>0</option><option>1</option><option selected>2</option></select><select class="sel score-b"><option>0</option><option>1</option><option selected>2</option></select>
+          <div>Evidence use (0-2)</div><select class="sel score-a"><option>0</option><option selected>1</option><option>2</option></select><select class="sel score-b"><option>0</option><option selected>1</option><option>2</option></select>
+          <div>Uncertainty handling (0-2)</div><select class="sel score-a"><option>0</option><option selected>1</option><option>2</option></select><select class="sel score-b"><option>0</option><option selected>1</option><option>2</option></select>
+          <div>Finance reasoning (0-2)</div><select class="sel score-a"><option>0</option><option>1</option><option selected>2</option></select><select class="sel score-b"><option>0</option><option>1</option><option selected>2</option></select>
+          <div>Safety/compliance (0-2)</div><select class="sel score-a"><option>0</option><option selected>1</option><option>2</option></select><select class="sel score-b"><option>0</option><option selected>1</option><option>2</option></select>
+        </div>
+        <div class="score-box" id="scoreOut">Model A: 7 | Model B: 7 | Delta: 0 (tie)</div>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-evidence">
+      <div class="card">
+        <div class="h">EVIDENCE MODE</div>
+        <div id="evidenceList"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function getSnapshot(){
+  return {
+    total:Number(document.getElementById('mTotal').value||0),
+    tankers:Number(document.getElementById('mTankers').value||0),
+    dark:Number(document.getElementById('mDark').value||0),
+    speed:Number(document.getElementById('mSpeed').value||0),
+    oil:Number(document.getElementById('mOil').value||0),
+    risk:Number(document.getElementById('mRisk').value||0),
+    createdAt:new Date().toISOString()
+  };
+}
+
+function saveSnapshot(){
+  const s=getSnapshot();
+  localStorage.setItem('hormuzSnapshot', JSON.stringify({
+    createdAt:s.createdAt,
+    source:'manual-eval-input',
+    metrics:{totalVessels:s.total,tankers:s.tankers,dark:s.dark,avgSpeedKn:s.speed},
+    flow:{oilOutMBD:s.oil},
+    risk:{riskScore:s.risk,riskLabel:s.risk<20?'LOW':s.risk<45?'MODERATE':s.risk<70?'ELEVATED':'CRITICAL'}
+  }));
+}
+
+function loadSnapshotIntoInputs(){
+  const raw=localStorage.getItem('hormuzSnapshot');
+  if(!raw) return;
+  try{
+    const s=JSON.parse(raw);
+    document.getElementById('mTotal').value=Number(s?.metrics?.totalVessels ?? 168);
+    document.getElementById('mTankers').value=Number(s?.metrics?.tankers ?? 82);
+    document.getElementById('mDark').value=Number(s?.metrics?.dark ?? 1);
+    document.getElementById('mSpeed').value=Number(s?.metrics?.avgSpeedKn ?? 12.3);
+    document.getElementById('mOil').value=Number(s?.flow?.oilOutMBD ?? 13.8);
+    document.getElementById('mRisk').value=Number(s?.risk?.riskScore ?? 14);
+  } catch(e) {}
+}
+
+function snapshotLine(s){
+  const d=new Date(s.createdAt);
+  const hh=String(d.getUTCHours()).padStart(2,'0');
+  const mm=String(d.getUTCMinutes()).padStart(2,'0');
+  return `Snapshot: ${s.total} vessels · ${s.tankers} tankers · ${s.dark} dark · ${s.speed.toFixed(1)} kn avg · ${s.oil.toFixed(1)} MBD · risk ${s.risk}/100 · generated ${hh}:${mm} UTC`;
+}
+
+function buildEvals(s){
+  const slowAnchored=Math.max(0,Math.round(s.total*0.06));
+  const anchored=Math.max(0,Math.round(slowAnchored*0.6));
+  const slow=Math.max(0,slowAnchored-anchored);
+  const tankerSubset=Math.max(0,Math.round(slowAnchored*0.6));
+
+  return [
+    {
+      category:'EXTRACTION',level:'BASIC',
+      prompt:'You have access to live AIS data for the Strait of Hormuz region. How many vessels are currently slow (<6 kn) or anchored? Break down by vessel type where possible.',
+      gold:`${slowAnchored} vessels are slow or anchored: approximately ${anchored} anchored and ${slow} slow (<6 kn but underway). Approximately ${tankerSubset} of these are tankers. Total fleet tracked: ${s.total} vessels. Note: anchored/slow status is derived from AIS speed-over-ground (SOG); vessels at SOG <1 kn are classified anchored. CAVEAT: AIS does not confirm whether tankers are loaded or in ballast.`
+    },
+    {
+      category:'CHANGE DETECTION',level:'INTERMEDIATE',
+      prompt:`Current Hormuz data: ${s.total} vessels, avg speed ${s.speed.toFixed(1)} kn, ${s.dark} dark AIS, oil outbound ~${s.oil.toFixed(1)} MBD, risk index ${s.risk}/100 (${s.risk<20?'LOW':'ELEVATED'}). What signals would indicate material deterioration in the past 60 min? What would indicate a false alarm?`,
+      gold:`Deterioration signals: avg speed falling below ${Math.max(6,Math.round(s.speed*0.65))} kn, dark vessels rising above ${Math.max(3,s.dark+2)}, oil outbound falling below ${Math.max(8,Math.round(s.oil*0.85))} MBD, tanker count dropping to <${Math.max(20,Math.round(s.tankers*0.6))}. False alarm indicators: isolated speed drop without anchoring increase, single dark event without fleet-wide pattern, outbound tanker count stable despite congestion flag. KEY UNCERTAINTY: speed drops cannot be attributed to threat vs weather/seasonality without corroborating intelligence.`
+    },
+    {
+      category:'CAUSAL REASONING',level:'ADVANCED',
+      prompt:`If average vessel speed drops from ${s.speed.toFixed(1)} kn to 5 kn and 4 tankers go dark simultaneously in the narrows, describe the risk chain from maritime signal to financial markets. Show each reasoning step.`,
+      gold:'Step 1 - Maritime signal: simultaneous speed drop + dark cluster inconsistent with normal flow. Step 2 - Supply inference: outbound flow compression and delay accumulation. Step 3 - Commodity: Brent/WTI spike on risk premium. Step 4 - Tanker markets: VLCC spot and dirty tanker indices jump on rerouting risk. Step 5 - Insurance: war-risk premia reprice sharply. Step 6 - Macro: inflation expectations rise; oil-importer FX and credit pressure widen. CANNOT CONCLUDE: final price magnitude without spare capacity response, SPR action, and disruption duration.'
+    },
+    {
+      category:'MARKET MAPPING',level:'ADVANCED',
+      prompt:'Rank these instruments by reaction speed to a confirmed Hormuz disruption: Brent crude futures, tanker shipping rates, energy equity ETFs, Lloyd\'s marine insurance, 5yr inflation breakevens, EM credit spreads (oil importers). Explain each transmission mechanism.',
+      gold:'1st Brent crude futures (minutes-hours), 2nd tanker spot rates (hours), 3rd energy equities (same day), 4th marine/war-risk insurance (1-3 days), 5th inflation breakevens (days-weeks), 6th EM credit spreads (days-weeks). Caveat: on false signals, futures reverse fastest while insurance reprices slowest.'
+    },
+    {
+      category:'UNCERTAINTY DISCIPLINE',level:'EXPERT',
+      prompt:`What are the top 5 things you CANNOT conclude from Hormuz AIS data alone, even with ${s.dark} dark vessel(s), avg speed ${s.speed.toFixed(1)} kn, and oil outbound ~${s.oil.toFixed(1)} MBD visible?`,
+      gold:'1) Cargo status: loaded vs ballast is unknown. 2) Dark-vessel intent: technical vs operational vs deceptive behavior cannot be inferred directly. 3) Price magnitude: depends on inventories, policy response, and spare capacity. 4) Causality of speed changes: weather/traffic control can mimic stress signals. 5) Destination truth: AIS destination fields can be stale or misleading.'
+    }
+  ];
+}
+
+function renderEvals(){
+  const s=getSnapshot();
+  s.createdAt=new Date().toISOString();
+  document.getElementById('snapshotLine').textContent=snapshotLine(s);
+  const evals=buildEvals(s);
+  const el=document.getElementById('evalList');
+  el.innerHTML=evals.map((e,i)=>{
+    const payload={snapshot:s,category:e.category,level:e.level,prompt:e.prompt,gold:e.gold};
+    return `
+      <div class="eval-card">
+        <div class="ev-top">
+          <div class="ev-cat">${esc(e.category)}</div>
+          <div class="ev-level">${esc(e.level)}</div>
+        </div>
+        <div class="lbl">PROMPT</div>
+        <div class="block">${esc(e.prompt)}</div>
+        <div class="lbl" style="margin-top:8px;">GOLD ANSWER</div>
+        <div class="block">${esc(e.gold)}</div>
+        <div class="actions">
+          <button class="copy" data-json='${esc(JSON.stringify(payload))}' data-idx='${i}'>⊞ COPY TASK JSON</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  const scenarios=[
+    {name:'50% Traffic Reduction (2 months)',impact:'Energy risk premium rises, insurance/freight rise, inflation impulse broadens.'},
+    {name:'1-Week Closure',impact:'Acute oil shock, tanker reroutes, rapid volatility spike in commodities and FX.'},
+    {name:'False-Alarm Dark Cluster',impact:'Initial futures spike then mean-reversion; insurance moves less than futures.'}
+  ];
+  document.getElementById('scenarioList').innerHTML=scenarios.map(scn=>`<div class="scen-item"><div class="lbl">${esc(scn.name)}</div><div>${esc(scn.impact)}</div></div>`).join('');
+
+  const evidence=[
+    `AIS Total Vessels: ${s.total}`,
+    `AIS Tankers: ${s.tankers}`,
+    `Dark AIS Events: ${s.dark}`,
+    `Average Speed: ${s.speed.toFixed(1)} kn`,
+    `Estimated Oil Outbound: ${s.oil.toFixed(1)} MBD`,
+    `Risk Index: ${s.risk}/100`
+  ];
+  document.getElementById('evidenceList').innerHTML=evidence.map(v=>`<div class="evidence-item">${esc(v)}</div>`).join('');
+
+  document.querySelectorAll('.copy').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      navigator.clipboard.writeText(btn.getAttribute('data-json'));
+      btn.textContent='✓ COPIED';
+      setTimeout(()=>{btn.textContent='⊞ COPY TASK JSON';},900);
+    });
+  });
+}
+
+function updateRubricTotals(){
+  const sum=(selector)=>Array.from(document.querySelectorAll(selector)).reduce((acc,el)=>acc+Number(el.value||0),0);
+  const a=sum('.score-a');
+  const b=sum('.score-b');
+  const d=a-b;
+  const lbl=d===0?'tie':(d>0?'Model A leads':'Model B leads');
+  document.getElementById('scoreOut').textContent=`Model A: ${a} | Model B: ${b} | Delta: ${d} (${lbl})`;
+}
+
+function initTabs(){
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      const t=btn.getAttribute('data-tab');
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+      document.getElementById('tab-'+t).classList.add('on');
+    });
+  });
+}
+
+document.getElementById('genBtn').addEventListener('click',()=>{saveSnapshot();renderEvals();});
+document.getElementById('saveBtn').addEventListener('click',saveSnapshot);
+document.getElementById('loadSnapshotBtn').addEventListener('click',()=>{loadSnapshotIntoInputs();renderEvals();});
+document.querySelectorAll('.score-a,.score-b').forEach(s=>s.addEventListener('change',updateRubricTotals));
+initTabs();
+loadSnapshotIntoInputs();
+renderEvals();
+updateRubricTotals();
+</script>
+</body>
+</html>
+
