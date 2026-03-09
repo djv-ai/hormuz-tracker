@@ -1331,7 +1331,7 @@ function setBadge(cls,txt){
 
 function runDarkLogic(){
   if(tickN%130===0&&Math.random()>0.5){
-    const cands=vessels.filter(v=>!v.isDark&&v.type!=='warship'&&v.type!=='unknown'&&v.zone==='strait');
+    const cands=vessels.filter(v=>!v.isDark&&!v.isReal&&v.type!=='warship'&&v.type!=='unknown'&&v.zone==='strait');
     if(cands.length>0){
       const v=cands[Math.floor(Math.random()*cands.length)];
       v.isDark=true;v.type_bk=v.type;v.type='dark';
@@ -1467,6 +1467,14 @@ function _doConnect(){
   aisWS.onopen=()=>{
     if(onOpenSend)onOpenSend();
     aisRetryCount=0;
+    // Purge all simulation vessels — live mode shows only real AIS data
+    vessels.forEach(v=>{
+      if(!v.isReal){
+        if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}
+        if(trails[v.id]){map.removeLayer(trails[v.id]);delete trails[v.id];}
+      }
+    });
+    vessels=vessels.filter(v=>v.isReal);
     setAS('LIVE AIS','s-live');
     const keyInp=document.getElementById('aisKey');
     if(keyInp)keyInp.style.borderColor='var(--green)';
