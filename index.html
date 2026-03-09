@@ -1259,7 +1259,7 @@ function updateAnalytics(){
 function updateStats(){
   const total=vessels.length;
   const tankers=vessels.filter(v=>v.type==='tanker').length;
-  const avg=vessels.reduce((s,v)=>s+v.speed,0)/total;
+  const avg=total>0?vessels.reduce((s,v)=>s+v.speed,0)/total:0;
   const inb=vessels.filter(v=>v.isIn&&v.speed>=3&&!v.isDark).length;
   const out=vessels.filter(v=>!v.isIn&&v.speed>=3&&!v.isDark).length;
   const anc=vessels.filter(v=>v.status==='ANCHORED').length;
@@ -1467,14 +1467,6 @@ function _doConnect(){
   aisWS.onopen=()=>{
     if(onOpenSend)onOpenSend();
     aisRetryCount=0;
-    // Purge all simulation vessels — live mode shows only real AIS data
-    vessels.forEach(v=>{
-      if(!v.isReal){
-        if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}
-        if(trails[v.id]){map.removeLayer(trails[v.id]);delete trails[v.id];}
-      }
-    });
-    vessels=vessels.filter(v=>v.isReal);
     setAS('LIVE AIS','s-live');
     const keyInp=document.getElementById('aisKey');
     if(keyInp)keyInp.style.borderColor='var(--green)';
@@ -1568,7 +1560,8 @@ function handleAIS(data, provider){
   if(lat<22||lat>30.5||lng<47.5||lng>62)return;
   // Water boundary — reject positions clearly over land
   // Seven rectangular water zones covering Persian Gulf + Strait + Gulf of Oman
-  const WZ=[[27.5,30.5,47.5,57.0],[25.5,27.5,49.0,56.8],[24.7,26.5,50.0,52.8],[24.0,25.8,52.0,57.2],[25.0,27.5,55.5,58.5],[22.0,25.5,57.5,62.0],[23.5,26.0,56.5,59.5]];
+  // Reject positions clearly over land — keep navigable water corridors
+  const WZ=[[27.0,30.5,47.5,57.2],[25.0,27.5,48.5,57.2],[24.5,26.5,49.5,53.0],[23.8,26.0,52.0,57.5],[24.8,27.8,55.0,59.0],[22.0,26.0,57.0,62.0],[23.0,26.5,56.0,60.0]];
   if(!WZ.some(([a,b,c,d])=>lat>=a&&lat<=b&&lng>=c&&lng<=d))return;
 
   const zone=lng<56.5?'gulf':(lng>57.8?'oman':'strait');
@@ -1585,6 +1578,12 @@ function handleAIS(data, provider){
       prog:0.5,wps:WP_IN,mmsi,imo:`IMO${mmsi}`,
       status:spd<1?'ANCHORED':'UNDERWAY',trail:[],isDark:false,darkDuration:0,isReal:true,lastSeen:Date.now(),zone};
     vessels.push(v);
+    // Once 5 real vessels have arrived, purge any remaining sim vessels
+    const realCount=vessels.filter(x=>x.isReal).length;
+    if(realCount===5){
+      vessels.forEach(x=>{if(!x.isReal){if(lm[x.id]){map.removeLayer(lm[x.id]);delete lm[x.id];}if(trails[x.id]){map.removeLayer(trails[x.id]);delete trails[x.id];}}});
+      vessels=vessels.filter(x=>x.isReal);
+    }
   } else {
     v.trail.push([v.lat,v.lng]);if(v.trail.length>35)v.trail.shift();
     v.lat=lat;v.lng=lng;v.speed=spd;v.lastSeen=Date.now();
