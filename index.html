@@ -1099,6 +1099,8 @@ function drawLanes(){
   L.marker([23.80,59.50],{icon:L.divIcon({html:'<div style="text-align:center;transform:translateX(-50%);pointer-events:none"><div style="color:#00d4ff;font-family:Bebas Neue,sans-serif;font-size:20px;letter-spacing:5px;white-space:nowrap;text-shadow:0 0 16px rgba(0,212,255,1),0 2px 8px rgba(0,0,0,1)">GULF OF OMAN</div><div style="color:rgba(0,212,255,.8);font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,1)">INDIAN OCEAN APPROACH</div></div>',className:'',iconSize:[0,0]})}).addTo(map);
 }
 
+function timeSince(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return s+'s ago';const m=Math.floor(s/60);return m+'m '+(s%60)+'s ago';}
+
 function renderVessels(){
   vessels.forEach(v=>{
     if(v.isDark){
@@ -1120,7 +1122,8 @@ function renderVessels(){
           className:'', iconSize:[16,20], iconAnchor:[8,10]
         });
 
-    const tt=`<strong style="color:${col}">${v.name}</strong><br>${v.type.toUpperCase()} · ${v.flag}<br>${v.speed.toFixed(1)} kn · ${v.status}<br>DEST: ${v.dest}<br>ZONE: ${v.zone.toUpperCase()}`;
+    const pingLine=v.isReal&&v.lastSeen?`<br>PING: ${timeSince(v.lastSeen)}`:'';
+    const tt=`<strong style="color:${col}">${v.name}</strong><br>${v.type.toUpperCase()} · ${v.flag}<br>${v.speed.toFixed(1)} kn · ${v.status}${pingLine}<br>DEST: ${v.dest}<br>ZONE: ${v.zone.toUpperCase()}`;
     if(lm[v.id]){lm[v.id].setLatLng([v.lat,v.lng]).setIcon(icon);lm[v.id].setTooltipContent(tt);}
     else{const m=L.marker([v.lat,v.lng],{icon}).addTo(map).on('click',()=>selVessel(v.id));m.bindTooltip(tt,{sticky:true,opacity:1});lm[v.id]=m;}
     // Trails for strait vessels only
@@ -1145,6 +1148,7 @@ function selVessel(id){
     ['DWT',v.dwt>0?v.dwt.toLocaleString():'N/A'],['MMSI',v.mmsi],
   ];
   if(v.recentDarkTransit&&v.transitDir)rows.push(['TRANSIT',v.transitDir]);
+  if(v.isReal&&v.lastSeen)rows.push(['LAST PING',timeSince(v.lastSeen)]);
   document.getElementById('vdG').innerHTML=rows.map(([k,val])=>`<div class="vd-c" style="${k==='TRANSIT'?'grid-column:span 2':''}"><div class="k">${k}</div><div class="v" style="${k==='TRANSIT'?'color:var(--amber)':''}">${val}</div></div>`).join('');
   map.panTo([v.lat,v.lng],{animate:true});
   document.querySelectorAll('.vr').forEach(el=>el.classList.toggle('sel',el.dataset.id===id));
@@ -1162,7 +1166,7 @@ function renderList(){
       <div class="vdot ${v.isDark?'dark':v.type}"></div>
       <div class="vi">
         <div class="vi-n">${v.name}${v.isDark?'<span class="dbadge">DARK</span>':v.recentDarkTransit?'<span class="tbadge">TRANSIT</span>':''}</div>
-        <div class="vi-s">${v.flag} · ${v.dest} · ${v.zone.toUpperCase()}</div>
+        <div class="vi-s">${v.flag} · ${v.zone.toUpperCase()}${v.isReal&&v.lastSeen?' · ⏱'+timeSince(v.lastSeen):''}</div>
       </div>
       <div class="vi-spd">${v.speed.toFixed(1)}<span>KN</span></div>
     </div>`).join('');
@@ -1553,7 +1557,11 @@ function handleAIS(data, provider){
   }
 
   if(!mmsi||!lat||!lng)return;
-  if(lat<22||lat>30||lng<48||lng>62)return;
+  if(lat<22||lat>30.5||lng<47.5||lng>62)return;
+  // Water boundary — reject positions clearly over land
+  // Seven rectangular water zones covering Persian Gulf + Strait + Gulf of Oman
+  const WZ=[[27.5,30.5,47.5,57.0],[25.5,27.5,49.0,56.8],[24.7,26.5,50.0,52.8],[24.0,25.8,52.0,57.2],[25.0,27.5,55.5,58.5],[22.0,25.5,57.5,62.0],[23.5,26.0,56.5,59.5]];
+  if(!WZ.some(([a,b,c,d])=>lat>=a&&lat<=b&&lng>=c&&lng<=d))return;
 
   const zone=lng<56.5?'gulf':(lng>57.8?'oman':'strait');
   const vid=`AIS_${mmsi}`;
@@ -1567,11 +1575,11 @@ function handleAIS(data, provider){
     v={id:vid,name:name||`AIS-${mmsi.slice(-4)}`,type,flag,
       dwt:0,dest:dest||'---',lat,lng,speed:spd,isIn:cog>180&&cog<360,
       prog:0.5,wps:WP_IN,mmsi,imo:`IMO${mmsi}`,
-      status:spd<1?'ANCHORED':'UNDERWAY',trail:[],isDark:false,darkDuration:0,isReal:true,zone};
+      status:spd<1?'ANCHORED':'UNDERWAY',trail:[],isDark:false,darkDuration:0,isReal:true,lastSeen:Date.now(),zone};
     vessels.push(v);
   } else {
     v.trail.push([v.lat,v.lng]);if(v.trail.length>35)v.trail.shift();
-    v.lat=lat;v.lng=lng;v.speed=spd;
+    v.lat=lat;v.lng=lng;v.speed=spd;v.lastSeen=Date.now();
     v.isIn=cog>180&&cog<360;
     v.status=spd<1?'ANCHORED':'UNDERWAY';
     v.zone=zone;
@@ -1590,6 +1598,30 @@ function tick(){
   tickN++;
   moveVessels();
   vessels.forEach(v=>{if(v.transitHighlight>0){v.transitHighlight--;}else if(v.recentDarkTransit){v.recentDarkTransit=false;}});
+  // Every ~9s: age out stale AIS vessels (no ping >5 min) and cap per zone
+  if(tickN%50===0){
+    const now=Date.now();
+    vessels=vessels.filter(v=>{
+      if(!v.isReal)return true;
+      if((now-(v.lastSeen||0))>300000){
+        if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}
+        if(trails[v.id]){map.removeLayer(trails[v.id]);delete trails[v.id];}
+        return false;
+      }
+      return true;
+    });
+    // Cap real vessels per zone at 20 — oldest pings removed first
+    ['strait','gulf','oman'].forEach(zone=>{
+      const zv=vessels.filter(v=>v.isReal&&v.zone===zone);
+      if(zv.length>20){
+        zv.sort((a,b)=>(a.lastSeen||0)-(b.lastSeen||0)).slice(0,zv.length-20).forEach(v=>{
+          if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}
+          if(trails[v.id]){map.removeLayer(trails[v.id]);delete trails[v.id];}
+          vessels.splice(vessels.indexOf(v),1);
+        });
+      }
+    });
+  }
   renderVessels();updateStats();runAlerts();runDarkLogic();drawSpk();
   sparkData.push(vessels.length+(Math.random()-.5)*1.5);sparkData.shift();
   if(tickN%8===0)renderList();
