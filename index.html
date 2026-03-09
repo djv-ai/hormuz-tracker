@@ -985,7 +985,7 @@ const BASELINE = 168;
 const TC = {tanker:"#00d4ff",cargo:"#00ff99",warship:"#ff2b2b",unknown:"#ffaa00",dark:"#ff6600"};
 const SR = {tanker:[9,15],cargo:[11,18],warship:[14,24],unknown:[4,9],dark:[4,8]};
 
-let vessels=[], lm={}, trails={}, selId=null;
+let vessels=[], lm={}, trails={}, selId=null, liveMode=false;
 let tickN=0, sparkData=Array(60).fill(BASELINE).map(v=>v+(Math.random()-.5)*5);
 let hourly=Array(24).fill(0).map(()=>Math.round(BASELINE+(Math.random()-.5)*8));
 let disruptTimer=0, inDisrupt=false, alertTick=0;
@@ -1103,6 +1103,11 @@ function timeSince(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return s
 
 function renderVessels(){
   vessels.forEach(v=>{
+    // In live mode, hide sim vessels and clean up their markers
+    if(liveMode&&!v.isReal){
+      if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}
+      return;
+    }
     if(v.isDark){
       if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}
       if(trails[v.id]){map.removeLayer(trails[v.id]);delete trails[v.id];}
@@ -1155,12 +1160,13 @@ function selVessel(id){
 }
 
 function renderList(){
-  const sorted=[...vessels].sort((a,b)=>{
+  const dv=liveMode?vessels.filter(v=>v.isReal):vessels;
+  const sorted=[...dv].sort((a,b)=>{
     if(a.isDark&&!b.isDark)return -1;if(!a.isDark&&b.isDark)return 1;
     if(a.recentDarkTransit&&!b.recentDarkTransit)return -1;if(!a.recentDarkTransit&&b.recentDarkTransit)return 1;
     return b.speed-a.speed;
   });
-  document.getElementById('vct').textContent=`(${vessels.length})`;
+  document.getElementById('vct').textContent=`(${dv.length})`;
   document.getElementById('vlist').innerHTML=sorted.map(v=>`
     <div class="vr ${selId===v.id?'sel':''} ${v.isDark?'dark-v':v.recentDarkTransit?'transit-v':''}" data-id="${v.id}" onclick="selVessel('${v.id}')">
       <div class="vdot ${v.isDark?'dark':v.type}"></div>
@@ -1467,6 +1473,7 @@ function _doConnect(){
   aisWS.onopen=()=>{
     if(onOpenSend)onOpenSend();
     aisRetryCount=0;
+    liveMode=true;
     setAS('LIVE AIS','s-live');
     const keyInp=document.getElementById('aisKey');
     if(keyInp)keyInp.style.borderColor='var(--green)';
@@ -1502,7 +1509,7 @@ function _doConnect(){
       aisRetryTimer=setTimeout(()=>{clearInterval(countInterval);_doConnect();},delay*1000);
     } else {
       // All retries exhausted — fall back to enhanced simulation
-      aisRetryCount=0;
+      aisRetryCount=0; liveMode=false;
       setAS('ENH SIM','s-sim');
       document.getElementById('aisDisc').style.display='none';
       pushAlert('warning','AIS UNAVAILABLE',`Live feed unavailable after ${AIS_RETRY_DELAYS.length} retries. Running enhanced simulation. Paste a valid key and click CONNECT to try again.`);
@@ -1511,10 +1518,11 @@ function _doConnect(){
 }
 
 function disconnectAIS(){
-  aisManualDisc=true;
+  aisManualDisc=true; liveMode=false;
   if(aisRetryTimer){clearTimeout(aisRetryTimer);aisRetryTimer=null;}
   if(aisWS){try{aisWS.onclose=null;aisWS.close();}catch(e){}aisWS=null;}
   // Remove live vessels, keep sim vessels
+  vessels.filter(v=>v.isReal).forEach(v=>{if(lm[v.id]){map.removeLayer(lm[v.id]);delete lm[v.id];}if(trails[v.id]){map.removeLayer(trails[v.id]);delete trails[v.id];}});
   vessels=vessels.filter(v=>!v.isReal);
   setAS('SIM MODE','s-sim');
   document.getElementById('aisDisc').style.display='none';
@@ -1560,9 +1568,10 @@ function handleAIS(data, provider){
   if(lat<22||lat>30.5||lng<47.5||lng>62)return;
   // Water boundary — reject positions clearly over land
   // Seven rectangular water zones covering Persian Gulf + Strait + Gulf of Oman
-  // Reject positions clearly over land — keep navigable water corridors
-  const WZ=[[27.0,30.5,47.5,57.2],[25.0,27.5,48.5,57.2],[24.5,26.5,49.5,53.0],[23.8,26.0,52.0,57.5],[24.8,27.8,55.0,59.0],[22.0,26.0,57.0,62.0],[23.0,26.5,56.0,60.0]];
-  if(!WZ.some(([a,b,c,d])=>lat>=a&&lat<=b&&lng>=c&&lng<=d))return;
+  // Reject positions clearly outside navigable waters
+  const inGulf=(lat>=24.0&&lat<=30.5&&lng>=47.5&&lng<=57.5);
+  const inOman=(lat>=22.0&&lat<=27.5&&lng>=56.0&&lng<=62.0);
+  if(!inGulf&&!inOman)return;
 
   const zone=lng<56.5?'gulf':(lng>57.8?'oman':'strait');
   const vid=`AIS_${mmsi}`;
@@ -1578,12 +1587,6 @@ function handleAIS(data, provider){
       prog:0.5,wps:WP_IN,mmsi,imo:`IMO${mmsi}`,
       status:spd<1?'ANCHORED':'UNDERWAY',trail:[],isDark:false,darkDuration:0,isReal:true,lastSeen:Date.now(),zone};
     vessels.push(v);
-    // Once 5 real vessels have arrived, purge any remaining sim vessels
-    const realCount=vessels.filter(x=>x.isReal).length;
-    if(realCount===5){
-      vessels.forEach(x=>{if(!x.isReal){if(lm[x.id]){map.removeLayer(lm[x.id]);delete lm[x.id];}if(trails[x.id]){map.removeLayer(trails[x.id]);delete trails[x.id];}}});
-      vessels=vessels.filter(x=>x.isReal);
-    }
   } else {
     v.trail.push([v.lat,v.lng]);if(v.trail.length>35)v.trail.shift();
     v.lat=lat;v.lng=lng;v.speed=spd;v.lastSeen=Date.now();
@@ -1629,8 +1632,13 @@ function tick(){
       }
     });
   }
-  renderVessels();updateStats();runAlerts();runDarkLogic();drawSpk();
+  renderVessels();
+  // Stats and sparkline use only real vessels in live mode
+  const _allV=vessels; if(liveMode)vessels=_allV.filter(v=>v.isReal);
+  updateStats();
   sparkData.push(vessels.length+(Math.random()-.5)*1.5);sparkData.shift();
+  vessels=_allV;
+  runAlerts();runDarkLogic();drawSpk();
   if(tickN%8===0)renderList();
 }
 
