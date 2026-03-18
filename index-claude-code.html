@@ -1431,8 +1431,9 @@ function connectAIS(){
   const keyInp=document.getElementById('aisKey');
   const prov=document.getElementById('aisProvider').value;
   const key=(keyInp&&keyInp.value.trim())||'';
-  if(!key){
-    pushAlert('warning','NO CREDENTIALS','Paste your API key (aisstream.io) or username (AISHub) and click CONNECT.');
+  // aisstream uses the server-side relay — no key required from client
+  if(!key && prov!=='aisstream'){
+    pushAlert('warning','NO CREDENTIALS','Paste your AISHub username and click CONNECT.');
     setAS('NO KEY','s-err'); return;
   }
   aisUserKey=key; aisUserProvider=prov; aisManualDisc=false;
@@ -1452,9 +1453,9 @@ function _doConnect(){
     url=`wss://data.aishub.net/ws?username=${encodeURIComponent(aisUserKey)}&format=1&filter=latmin=22&latmax=30&lonmin=48&lonmax=62`;
     onOpenSend=null; // AISHub sends data immediately after connection
   } else {
-    // aisstream.io — API key via message
-    url='wss://stream.aisstream.io/v0/stream';
-    onOpenSend=()=>aisWS.send(JSON.stringify({APIKey:aisUserKey,BoundingBoxes:[[[22.0,48.0],[30.0,62.0]]],FilterMessageTypes:['PositionReport','ShipStaticData']}));
+    // aisstream.io — proxied via Render relay (API key kept server-side)
+    url='wss://hormuz-ais-proxy.onrender.com';
+    onOpenSend=null;
   }
 
   aisWS=new WebSocket(url);
@@ -1599,7 +1600,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTimeout(()=>pushAlert('info','SYSTEM','Tracker online. Persian Gulf · Strait of Hormuz · Gulf of Oman active.'),400);
   setTimeout(()=>pushAlert('info','OIL FLOW','Est. 14-18 MBD crude transiting outbound. 20% of global oil supply under monitoring.'),1400);
   setTimeout(()=>pushAlert('info','LNG','Qatar RasGas + ADNOC LNG carriers active. Outbound to East Asia.'),2200);
-  setTimeout(()=>pushAlert('info','AIS','Click the SIM MODE badge (top bar) to open the AIS panel and connect with a free aisstream.io key for live vessel data.'),3000);
+  setTimeout(()=>{ aisUserProvider='aisstream'; aisManualDisc=false; _doConnect(); },3000);
   setInterval(tick,180);setInterval(clockTick,1000);clockTick();
 });
 </script>
